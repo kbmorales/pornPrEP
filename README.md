@@ -43,6 +43,7 @@ i. Obtaining the raw data
   i.2. Utilizing a scraper
     i.2.a. the python script porngram developed by Sexualtics, a now defunct porn metadata concern: https://github.com/sexualitics/porngram
     i.2.b. https://github.com/gedankenstuecke/pOrNtology
+    i.2.c. https://www.pornhub.com/rss
   i.3. Contacting reddit user mrborgen86 who claimed on r/datasets the he has a (now defunct) database containing PornHub data
       -- AWAITING RESPONSE
   i.4. Manually trolling gay porn on PornHub for data
