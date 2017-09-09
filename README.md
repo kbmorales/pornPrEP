@@ -65,3 +65,12 @@ v. You need to provide reasonable justification you can answer that question wit
     The most crucial data fields necessary for this analysis would be date a film was posted, perhaps date a film was produced, condom use: yes or no, sales or viewing info (if available), number of sex performers in scene
   	v.3. STI time series data
     Easy enough.
+
+Feedback from AdvDataSci peoples:
+1. Terms of Service violations
+After reviewing the Terms of Service (ToS), there is no explicit prohibition of web scraping. Any implicit references to activities that may be similar are so shaky that they would not stand in a court of law.
+Most important language pertaining to this is:
+"[Users] also hereby grant each user of the Website a non-exclusive, royalty free license to access your Content through the Website, and to use, reproduce, distribute, display, communicate and perform such Content as permitted through the functionality of the Website and under these Terms of Service."
+2. Let IT know
+I reached out to David (dstrato@jhsph.edu) about my scraping of PornHub, and he seemed cool with it.
+3. Need a more concrete question.
