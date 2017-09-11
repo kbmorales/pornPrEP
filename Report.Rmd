@@ -9,6 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r libraries, echo=FALSE}
+library(devtools)
+library(rmarkdown)
+```
+
 ## Initial Proposal:
 
 **Option 6 - Project Petition**
@@ -127,3 +132,7 @@ I reached out to David (dstratto@jhsph.edu) about my scraping of PornHub, and he
 #### Need a more concrete question
 
 Stephen pointed me to the [Regression-Discontinuity design](https://www.socialresearchmethods.net/kb/quasird.php).
+
+```{r sessioninfo, echo=FALSE}
+session_info
+```
