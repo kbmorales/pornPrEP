@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r libraries, echo=FALSE}
+```{r libraries, include=FALSE}
 library(devtools)
 library(rmarkdown)
 ```
@@ -121,9 +121,11 @@ In discussion with Stephen during lab on September 8, 2017, I received the follo
 
 After reviewing the [Terms of Service (ToS)](https://www.pornhub.com/information#terms), there is no explicit prohibition of web scraping provided it is done for a noncommercial purpose, as mine is. Any implicit references to activities that may be similar are so shaky that they would not stand in a court of law. I have uploaded a Word document of the ToS to this project's folder.
 
-Essentially, I would be utilizing the same loophole that PornHub uses to divest itself of responsibility for the content on their website. Since everything I would be scraping is actually "user content," I would not be in violation of the terms of service which only prohibits me from using any of "the works" of PornHub (the website and "certain materials").
+Essentially, I would be utilizing the same loophole that PornHub uses to divest itself of responsibility for the content on their website.
 
 > "[Users] also hereby grant each user of the Website a non-exclusive, royalty free license to access your Content through the Website, and to use, reproduce, distribute, display, communicate and perform such Content as permitted through the functionality of the Website and under these Terms of Service."
+
+Since everything I would be scraping is actually "user content," I would not be in violation of the terms of service which only prohibits me from using any of "the works" of PornHub (the website and "certain materials").
 
 #### Let JHSPH IT know
 
@@ -133,6 +135,10 @@ I reached out to David (dstratto@jhsph.edu) about my scraping of PornHub, and he
 
 Stephen pointed me to the [Regression-Discontinuity design](https://www.socialresearchmethods.net/kb/quasird.php).
 
-```{r sessioninfo, echo=FALSE}
+
+
+END
+
+```{r sessioninfo, include=FALSE}
 session_info
 ```
