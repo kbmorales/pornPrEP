@@ -12,6 +12,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r libraries, include=FALSE}
 library(devtools)
 library(rmarkdown)
+library(googlesheets)
+library(jsonlite)
+library(rvest)
+library(stringr)
 ```
 
 ## Initial Proposal:
@@ -19,11 +23,19 @@ library(rmarkdown)
 **Option 6 - Project Petition**
 
 ### Question
-Is there a correlation between the safer sex practices employed in gay porn videos viewed on popular pornographic websites in the United States in the last 5 - 10 years and:
 
-1. PrEP's US timeline (approval of Truvada as for pre-exposure prophylaxis, news cycle and ad campaigns, major health department efforts, cultural mentions, etc.) ,
-2. Rates of gonorrhea, syphilis, and chlamydia among MSM in the USA,
-3. Timeline of gay male social apps (Grindr, Scruff, etc.)?
+Is there a correlation between the safer sex practices (condom use = yes or no) employed in gay porn videos viewed on popular pornographic websites in the United States in the last 5 - 10 years and:
+
+1. PrEP's US timeline
+
+* approval of Truvada for pre-exposure prophylaxis
+* news cycle and ad campaigns
+* major health department efforts
+* cultural mentions
+
+2. Rates of gonorrhea, syphilis, and chlamydia among MSM in the USA
+
+3. Timelines of gay male geosocial dating apps (Grindr, Scruff, etc.)?
 
 ### Background:
 
@@ -133,7 +145,15 @@ I reached out to David (dstratto@jhsph.edu) about my scraping of PornHub, and he
 
 #### Need a more concrete question
 
-Stephen pointed me to the [Regression-Discontinuity design](https://www.socialresearchmethods.net/kb/quasird.php).
+Regression - Discontinuity:
+
+Films designated as "visible condom use" = 0 for no, 1 for yes.
+Measures: Total views for films
+"Program" group: Films produced after the cutoff, average of most popular gay pornographic films on PornHub (between 0 and 1)
+"Control" group: Films produced before the cutoff, average of most popular gay pornographic films on PornHub (between 0 and 1)
+Cutoff: Some timepoint, most probably approval of Truvada as PrEP in the USA + an unknown amount of lag time
+
+Source: Stephen pointed me to the [Regression-Discontinuity design](https://www.socialresearchmethods.net/kb/quasird.php).
 
 
 
