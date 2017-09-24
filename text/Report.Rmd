@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r libraries, include=FALSE}
 library(devtools)
 library(rmarkdown)
-library(googlesheets)
 library(jsonlite)
 library(rvest)
 library(stringr)
@@ -92,7 +91,10 @@ Manually accessing mainstream gay porn sites for changes in their safer sex prac
   
 #### Data processing
 
-To do.
+```{rvest code}
+url <- 'https://www.pornhub.com/gay/video?si=1'
+webpage <- read_html(url)
+```
   
 #### Make data publicly available by end of class
 
