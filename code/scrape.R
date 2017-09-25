@@ -30,7 +30,7 @@ head(cat_gay_length)
 cat_gay_views <- webpage %>%
   html_nodes('.index-views') %>%
   html_text() %>%
-  str_replace("[,]", "") %>%
+  str_replace_all("[,]", "") %>%
   as.numeric()
 head(cat_gay_views)
 
@@ -41,3 +41,11 @@ cat_gay_rating <- webpage %>%
   as.numeric()
 head(cat_gay_rating)
 
+# Compile vectors into dataframe for category
+
+index_col_names <- c("Title", "Length", "Views", "Rating")
+
+cat_gay <- data.frame(cat_gay_title, cat_gay_length, cat_gay_views, cat_gay_rating)
+names(cat_gay) <- index_col_names
+cat_gay = cat_gay[-1,]
+cat_gay[order(-cat_gay[,3]),]
