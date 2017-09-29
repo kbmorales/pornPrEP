@@ -1,6 +1,8 @@
 library(rvest)
 library(stringr)
 library(httr)
+library(rebus)
+library(dplyr)
 
 # Site URL structure: si = site index (TRUE or FALSE, o = order (mv = most viewed), t = time period (w = weekly), cc = country code? (ex.: us)
 
@@ -35,10 +37,40 @@ for(i in seq_along(urls)) {
   dat.list[[i]] = data.frame(category = category_names[i],titles,vid_length,views,rating, url, viewkey)
   }
 
+# Compile into single dataframe, identifies duplicates, saves data
 all_data = do.call(rbind,dat.list)
+duplicate <- duplicated(all_data[,7])
+all_data[,"duplicate"] <- duplicate
+save(all_data, file = "data/siteindex_data.Rda")
+
+# Delete duplicate rows -- deletes after first appearance, so first categories will be "overrepresented" (if that matters)
+all_data <- subset(all_data, !duplicated(all_data[,7]))
+all_data <- all_data[,-ncol(all_data)]
+save(all_data, file = "data/siteindex_data_nodup.Rda")
+
+# Grab additional information from each video
+all_data$url <- as.character(all_data$url)
+
+viddat.list = list()
+
+for(i in seq_along(all_data$url)) {
+  Sys.sleep(runif(1,0,1))
+  webpage <- read_html(all_data$url[i])
+  categories <- html_nodes(webpage, '.categoriesWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
+  production <- html_nodes(webpage, '.production') %>% html_text()
+  tags <- html_nodes(webpage, '.tagsWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
+  added <- html_nodes(webpage, '.showLess:nth-child(6) .white') %>% html_text()
+  viddat.list[[i]] = data.frame(viewkey = all_data$viewkey[i],categories,production,tags,added)
+}
+
+# Save lists of video data as a dataframe
+vid_data = do.call(rbind,viddat.list)
+
+# Merge dataframes together, save
+bysiteindex_data <- merge(all_data, vid_data)
+save(bysiteindex_data, file = "data/siteindexvideo_data.Rda")
 
 # Test: 'Gay' Video Title Data (no category)
-
 url <- 'https://www.pornhub.com/gay/video?si=1'
 webpage <- read_html(url)
 cat_gay_title <- webpage %>% html_nodes('.index-title') %>% html_text()
@@ -52,30 +84,6 @@ names(cat_gay) <- index_col_names
 cat_gay = cat_gay[-1,]
 cat_gay[order(-cat_gay[,3]),]
 
-# Framework for a scraping a video page
-
-url <- 'https://www.pornhub.com/view_video.php?viewkey=ph59bc050e96ea6'
-webpage <- read_html(url)
-test_views <- webpage %>% html_nodes('.count') %>% html_text() %>% str_replace_all("[,]", "") %>% as.numeric()
-test_rating <- webpage %>% html_nodes('.percent') %>% html_text() %>% str_replace("[%]", "") %>% as.numeric()
-test_cat <- webpage %>% html_nodes('.categoriesWrapper') %>% html_text()
-  test_cat <- str_replace_all(test_cat, "\n", "")
-  test_cat <- str_replace_all(test_cat, "\t", "")
-  test_cat <- str_replace(test_cat, pattern = fixed("Categories: "), "")
-  test_cat <- str_replace(test_cat, pattern = fixed("+ Suggest"), "")
-  # str_split(test_cat, ", ")
-test_prod <- webpage %>% html_nodes('.production') %>% html_text()
-test_tags <- webpage %>% html_nodes('.tagsWrapper') %>% html_text()
-  test_tags <- str_replace_all(test_tags, "\n", "")
-  test_tags <- str_replace_all(test_tags, "\t", "")
-  # won't remove opening tags for some reason
-  test_tags <- str_replace(test_tags, "Tags: ", "")
-  test_tags <- str_replace(test_tags, pattern = fixed("+ Suggest"), "")
-  # str_split(test_tags, ", ")
-test_added <- webpage %>% html_nodes('.showLess:nth-child(6) .white') %>% html_text()
-
-# NOTES from lab: Sep 25
-# html_attrs() - grabs html attributes, grab href (link)
-
+# NOTES
 # create list of vectors for URLs from a video page
 # unlist to grab the URLs
