@@ -12,7 +12,10 @@ category_numbers <- c(252, 48, 40, 66, 58, 44, 56, 362, 392, 68, 382, 71, 352, 4
 category_names <- c("Amateur", "Asian", "Bareback", "Bear", "Big Dick", "Black", "Blowjob", "Casting", "Chubby", "College", "Compilation", "Creampie", "Cumshot", "Daddy", "Euro", "Fetish", "Group", "Handjob", "Hunks", "Interracial", "Japanese", "Jock", "Latino", "Massage", "Mature", "Military", "Muscle", "Pornstar", "POV", "Public", "Reality", "Rough Sex", "Solo Male", "Straight Guys", "Twink", "Uncut", "Vintage", "Virtual Reality", "Webcam")
 names(category_numbers) <- category_names
 
-# Videos by "Site Index":
+
+# VIDEOS BY "SITE INDEX"
+
+
 # Establishes URL system for scraping from index sites
 # Example: https://www.pornhub.com/gay/video?c=40&si=1
 # Only C for category and si for site index (=1 for TRUE)
@@ -69,6 +72,59 @@ vid_data = do.call(rbind,viddat.list)
 # Merge dataframes together, save
 bysiteindex_data <- merge(all_data, vid_data)
 save(bysiteindex_data, file = "data/siteindexvideo_data.Rda")
+
+
+# VIDEOS BY "RANDOM"
+
+# Randomly grab 10000 videos
+
+url <- "https://www.pornhub.com/gay/video/random"
+
+trimpatdate <- dgt(6) %R% "/" %R% dgt(2)
+trimpatvk <- fixed("https://www.pornhub.com/view_video.php?viewkey=")
+
+randviddat.list = list()
+
+x <- 10000
+
+# Seem unable to extract length from video
+# length <- html_nodes(webpage, '.mhp1138_total') %>% html_text()
+
+for(i in 1:x) {
+  Sys.sleep(runif(1,0,1))
+  if (status_code(GET(url)) == 200) {
+    webpage <- read_html(url)
+    if (length(html_attr(html_nodes(webpage, '.premiumLocked'), name = "class") != 0)) {
+      x <- x+1
+    } else {
+      title <- html_nodes(webpage, '.inlineFree') %>% html_text()
+      views <- html_nodes(webpage, '.count') %>% html_text() %>% str_replace_all("[,]", "") %>% as.numeric()
+      rating <- html_nodes(webpage, '.percent') %>% html_text() %>% str_replace("[%]", "") %>% as.numeric()
+      categories <- html_nodes(webpage, '.categoriesWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
+      production <- html_nodes(webpage, '.production') %>% html_text()
+      tags <- html_nodes(webpage, '.tagsWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
+      added <- html_nodes(webpage, xpath = '/html/head/link[5]') %>% html_attr(name = "href") %>% str_extract(pattern = trimpat) %>% str_replace("/", "")
+      viewkey <- html_nodes(webpage, xpath = '/html/head/link[4]') %>% html_attr(name = "href") %>% str_replace(pattern = trimpatvk, "")
+      randviddat.list[[i]] = data.frame(title,views,rating,categories,production,tags,added,viewkey)
+    }
+  } else {
+    x <- x+1
+  }
+}
+
+# VIDEOS BY "TOTAL VIEWS" OVER "ALL TIME" IN THE US
+
+# Apparently violates the robots.txt >.<
+
+# Example URL (last page): https://www.pornhub.com/gay/video?o=mv&t=a&cc=us&page=100
+
+# Grab URLs:
+# Need to go from page 1:100
+
+# Video URL skimming: need URL and viewkey 
+
+# TESTING
+
 
 # Test: 'Gay' Video Title Data (no category)
 url <- 'https://www.pornhub.com/gay/video?si=1'
