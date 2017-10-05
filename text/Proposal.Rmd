@@ -9,14 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r libraries, include=FALSE}
-library(devtools)
-library(rmarkdown)
-library(jsonlite)
-library(rvest)
-library(stringr)
-```
-
 ## Initial Proposal:
 
 **Option 6 - Project Petition**

@@ -2,7 +2,6 @@
 
 library(rebus)
 library(lubridate)
-library(wordcloud2)
 library(cowplot)
 library(splitstackshape)
 
@@ -38,13 +37,14 @@ bysiteindex_data$year <- year(bysiteindex_data$dateadded)
 save(bysiteindex_data, file = "data/siteindexvidyear_data.Rda")
 
 # Remove extraneous data and reorder columns from site index scraping
-bysiteindex_data <- bysiteindex_data[c("titles", "categories", "tags", "year", "views", "production", "viewkey", "url")]
+bysiteindex_data <- bysiteindex_data[c("titles", "categories", "tags", "year", "views", "rating", "production", "viewkey", "url")]
 
 bysiteindex_data$categories <- as.character(bysiteindex_data$categories)
 bysiteindex_data$titles <- as.character(bysiteindex_data$titles)
 bysiteindex_data$tags <- as.character(bysiteindex_data$tags)
 
 bb_pattern <- "bare|(?:^| )bb(?:$| )|breed|cream|cum dump|felch|raw"
+
 bb_vids_titles <- bysiteindex_data[grepl(bb_pattern, bysiteindex_data$titles, ignore.case=TRUE),]
 bb_vids_cats <- bysiteindex_data[grepl(bb_pattern, bysiteindex_data$categories, ignore.case=TRUE),]
 bb_vids_tags <- bysiteindex_data[grepl(bb_pattern, bysiteindex_data$tags, ignore.case=TRUE),]
