@@ -1,3 +1,5 @@
+# Purpose: to scrape data from PornHub video URLs
+
 library(rvest)
 library(stringr)
 library(httr)
@@ -26,6 +28,8 @@ urls <- paste0(url_stem, "?c=", category_numbers, "&si=1")
 
 index_col_names <- c("Title", "Length", "Views", "Rating", "URL", "View Key")
 
+trimpatvk <- fixed("https://www.pornhub.com/view_video.php?viewkey=")
+
 dat.list = list()
 
 for(i in seq_along(urls)) {
@@ -36,7 +40,7 @@ for(i in seq_along(urls)) {
   views = html_nodes(webpage, '#categoryListContent .index-views') %>% html_text() %>% str_replace_all("[,]", "") %>% as.numeric()
   rating = html_nodes(webpage, '#categoryListContent .index-rating') %>% html_text() %>% str_replace("[%]", "") %>% as.numeric()
   url = html_nodes(webpage, '.index-title a') %>% html_attr("href")
-  viewkey = str_replace(url, pattern = fixed("https://www.pornhub.com/view_video.php?viewkey="), "")
+  viewkey = str_replace(url, pattern = trimpatvk, "")
   dat.list[[i]] = data.frame(category = category_names[i],titles,vid_length,views,rating, url, viewkey)
   }
 
@@ -54,6 +58,8 @@ save(all_data, file = "data/siteindex_data_nodup.Rda")
 # Grab additional information from each video
 all_data$url <- as.character(all_data$url)
 
+trimpatdate <- dgt(6) %R% "/" %R% dgt(2)
+
 viddat.list = list()
 
 for(i in seq_along(all_data$url)) {
@@ -62,8 +68,16 @@ for(i in seq_along(all_data$url)) {
   categories <- html_nodes(webpage, '.categoriesWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
   production <- html_nodes(webpage, '.production') %>% html_text()
   tags <- html_nodes(webpage, '.tagsWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
-  added <- html_nodes(webpage, '.showLess:nth-child(6) .white') %>% html_text()
+  added <- html_nodes(webpage, xpath = '/html/head/link[5]') %>% html_attr(name = "href") %>% str_extract(pattern = trimpatdate) %>% str_replace("/", "")
   viddat.list[[i]] = data.frame(viewkey = all_data$viewkey[i],categories,production,tags,added)
+}
+
+# Added ability to grab date added
+for(i in seq_along(all_data$url)) {
+  Sys.sleep(runif(1,0,1))
+  webpage <- read_html(all_data$url[i])
+  dateadded <- html_nodes(webpage, xpath = '/html/head/link[5]') %>% html_attr(name = "href") %>% str_extract(pattern = trimpatdate) %>% str_replace("/", "")
+  viddat.list[[i]] = data.frame(viewkey = all_data$viewkey[i],dateadded)
 }
 
 # Save lists of video data as a dataframe
@@ -79,9 +93,6 @@ save(bysiteindex_data, file = "data/siteindexvideo_data.Rda")
 # Randomly grab 10000 videos
 
 url <- "https://www.pornhub.com/gay/video/random"
-
-trimpatdate <- dgt(6) %R% "/" %R% dgt(2)
-trimpatvk <- fixed("https://www.pornhub.com/view_video.php?viewkey=")
 
 randviddat.list = list()
 
@@ -103,7 +114,7 @@ for(i in 1:x) {
       categories <- html_nodes(webpage, '.categoriesWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
       production <- html_nodes(webpage, '.production') %>% html_text()
       tags <- html_nodes(webpage, '.tagsWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
-      added <- html_nodes(webpage, xpath = '/html/head/link[5]') %>% html_attr(name = "href") %>% str_extract(pattern = trimpat) %>% str_replace("/", "")
+      added <- html_nodes(webpage, xpath = '/html/head/link[5]') %>% html_attr(name = "href") %>% str_extract(pattern = trimpatdate) %>% str_replace("/", "")
       viewkey <- html_nodes(webpage, xpath = '/html/head/link[4]') %>% html_attr(name = "href") %>% str_replace(pattern = trimpatvk, "")
       randviddat.list[[i]] = data.frame(title,views,rating,categories,production,tags,added,viewkey)
     }
