@@ -1,5 +1,5 @@
 ---
-title: "Project"
+title: "Project Description"
 author: "Kenneth Morales"
 date: "October 5, 2017"
 output: html_document
@@ -9,40 +9,28 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r libraries, include=FALSE}
-library(devtools)
-library(rmarkdown)
-library(jsonlite)
-library(rvest)
-library(stringr)
+```{r libraries, eval = FALSE}
+packages = c("devtools", "rmarkdown", "httr", "rvest", "stringr", "rebus", "dplyr", "lubridate", "cowplot", "ggplot2", "wordcloud", "ggthemes")
+lapply(packages,library,character.only=TRUE)
 ```
 
 ### Question
 
-Is there a correlation between the safer sex practices (condom use = yes or no) employed in gay porn videos viewed on popular pornographic websites in the United States in the last 5 - 10 years and:
-
-1. PrEP's US timeline
-
-* approval of Truvada for pre-exposure prophylaxis
-* news cycle and ad campaigns
-* major health department efforts
-* cultural mentions
-
-2. Rates of gonorrhea, syphilis, and chlamydia among men who have sex with men (MSM) in the USA
-
-3. Timelines of gay male geosocial dating apps (Grindr, Scruff, etc.)?
+Is there a correlation between the safer sex practices (condom use = yes or no) employed in gay porn videos viewed on the popular pornographic website PornHub (PH) in the United States in the last 5 - 10 years and the new guidelines recommended for Truvada to be used as pre-exposure prophylaxis (PrEP) on May 14, 2014?
 
 A descriptive(?) data analysis of gay male pornographic videos available online and their viewing trends over the past 5-10 years.
 
-Regression - Discontinuity:
+Regression - Discontinuity Design:
 
-Films designated as "visible condom use" = 0 for no, 1 for yes.
-Measures: Total views for films
-"Program" group: Films produced after the cutoff, average of most popular gay pornographic films on PornHub (between 0 and 1)
-"Control" group: Films produced before the cutoff, average of most popular gay pornographic films on PornHub (between 0 and 1)
-Cutoff: Some timepoint, most probably approval of Truvada as PrEP in the USA + an unknown amount of lag time
+Films designated as "bareback" (no visible condom use) = 0 for no, 1 for yes.
+Measures: Total views for films; mean views of films by bareback category; ratio of views by bareback category 
+"Program" group: Films added to PH after the cutoff, as chosen by a random sample (N = 100000)
+"Control" group: Films added to PH before the cutoff
+Cutoff: May 14, 2014 (publication of guidelines for recommendation of Truvada as PrEP in the USA) + an unknown amount of lag time?
 
 Source: Stephen pointed me to the [Regression-Discontinuity design](https://www.socialresearchmethods.net/kb/quasird.php).
+
+Throughout this analysis, "bareback" will refer to sex between two men without the use of condoms, as it is the most common term for such an activity in gay verbiage.
 
 ---
 
@@ -67,8 +55,8 @@ Since the AIDS crisis in the 1980s, condoms have been standard parts of gay porn
 In recent years, porn studios, both gay and straight, have seen their profits being eaten in to by a combination of three phenomenons:
 
 1. The rise of the "tube" sites (such as PornHub), which aggregate and disseminate pornography, usually without a membership fee,
-2. The piracy of pornography and distribution via peer-to-peer networks and forums,
-3. and burgeoning competition from amateur, DIY pornographers, many of which are capable of providing bareback porn, being unrestrained by mainstream conventions.
+2. The piracy of pornography and distribution via peer-to-peer networks and forums, as well as through the tune sites, and
+3. burgeoning competition from amateur, DIY pornographers, many of which are capable of providing bareback porn, being unrestrained by mainstream conventions.
 
 With the advent of PrEP, however, gay porn studios suddenly had an out: they could provide bareback sex for audiences who preferred it while still bearing the mantle of "safer" sex. Most large gay pornographic studios began producing bareback porn in the years following the CDC's endorsement of Truvada as PrEP.
 
@@ -76,7 +64,57 @@ With the advent of PrEP, however, gay porn studios suddenly had an out: they cou
 
 #### Obtaining the raw data
 
-##### Limitations:
+Performed on October 6th 2017 (code finished running on October 8th, 2017) using the "Random video" function of PH's website. I will only be analyzing videos that are not behind PH's paywall for subscribers to PH Premium (HD videos and an advertisement-free interface). Unfortunately, I am unable to grab the video lengths, though that is not necessary for my analysis:
+
+```{scrape}
+
+# Randomly grab 10000 videos using PH's "random" link
+
+url <- "https://www.pornhub.com/gay/video/random"
+trimpatdate <- dgt(6) %R% "/" %R% dgt(2)
+trimpatvk <- fixed("https://www.pornhub.com/view_video.php?viewkey=")
+randviddat.list = list()
+x <- 10000
+
+# Seem unable to extract length from video
+# length <- html_nodes(webpage, '.mhp1138_total') %>% html_text()
+
+for(i in 1:x) {
+  Sys.sleep(runif(1,0,1))
+  # Check to make sure the video URL is not a bad link
+  if (status_code(GET(url)) == 200) {
+    webpage <- read_html(url)
+    # If the video is part of PH's premium content, skip
+    if (length(html_attr(html_nodes(webpage, '.premiumLocked'), name = "class") != 0)) { 
+      x <- x+1
+    } else {
+      title <- html_nodes(webpage, '.inlineFree') %>% html_text()
+      views <- html_nodes(webpage, '.count') %>% html_text() %>% str_replace_all("[,]", "") %>% as.numeric()
+      rating <- html_nodes(webpage, '.percent') %>% html_text() %>% str_replace("[%]", "") %>% as.numeric()
+      categories <- html_nodes(webpage, '.categoriesWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
+      production <- html_nodes(webpage, '.production') %>% html_text()
+      tags <- html_nodes(webpage, '.tagsWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
+      added <- html_nodes(webpage, xpath = '/html/head/link[5]') %>% html_attr(name = "href") %>% str_extract(pattern = trimpatdate) %>% str_replace("/", "")
+      viewkey <- html_nodes(webpage, xpath = '/html/head/link[4]') %>% html_attr(name = "href") %>% str_replace(pattern = trimpatvk, "")
+      randviddat.list[[i]] = data.frame(title,views,rating,categories,production,tags,added,viewkey)
+    }
+  } else {
+    x <- x+1
+  }
+}
+
+# Compile into single dataframe, identifies duplicates, saves data
+all_data = do.call(rbind,randviddat.list)
+duplicate <- duplicated(all_data[,7])
+all_data[,"duplicate"] <- duplicate
+save(all_data, file = "data/randvid_data_dup.Rda")
+all_data <- subset(all_data, !duplicated(all_data[,7]))
+all_data <- all_data[,-ncol(all_data)]
+save(all_data, file = "data/randvid_data.Rda")
+
+```
+
+###### Limitations:
 
 1. Data by Country Viewership
 
@@ -96,17 +134,55 @@ PornHub provides a specific [url stem](https://www.pornhub.com/gayporn) to cordo
 
 <center>![PornHub Insights: 2016 Traffic, Gay Visitors in the US.](pornhub-insights-2016-US-gay-visitors.png)</center>
 
-3. Video Upload Dates
+3. The Paywall Effect
 
-Working on this.
+For my analysis, I was unable to scrape data from videos behind PH's Premium service paywall. As a result, it is possibly that viewing habits and the videos themselves might differ markedly between Premium subscribers and users who only access content not behind a paywall. However, according to CovenantEyes, a religiousky-based anti-porn advocacy organization modeled after consumer watchdogs, 9 out of 10 users access free pornography.
 
 4. Reliance on text descriptors of videos
 
-For this analysis, I am relying on text descriptors, both user-supplied (video title, tags) and host-supplied (categories), in order to determine if a video contains sex between two or more performers without use of condoms. This introduces a potential for incorrect classification, but viewing individual videos is outside of the scope of this project.
+For this analysis, I am relying on text descriptors, both user-supplied (video title, tags) and host-supplied (categories), in order to determine if a video contains sex between two or more performers without use of condoms. Addtionally, for the "Solo Male" category, which is removed from the sample due to its inability to capture the activity of interest (penetrative sex), there is a possibility for misclassification also. This introduces a potential for incorrect classification, but viewing individual videos is outside of the scope of this project.
+
+5. Reliance on "random" video URL
+
+I have no way of knowing how PH decides which video will appear on its "random" video service, but I am assuming it is truly random for purposes of this project.
+
+#### Data Cleaning
+
+Though "Bareback" is a category of videos, the categorization on videos may not be foolproof. User-submitted categorization methods (titles and tags) will be scanned for containing terms commonly associated with sex without condoms in gay slang.
+
+```{clean}
+# Generate a pattern to detect for sex without condoms
+bb_pattern <- "bare|(?:^| )bb(?:$| )|breed|cream|cum dump|felch|raw"
+
+# Scan titles, tags, and categories for indications of barebacking
+all_data$categories <- as.character(all_data$categories)
+all_data$titles <- as.character(all_data$titles)
+all_data$tags <- as.character(all_data$tags)
+
+bb_vids_titles <- all_data[grepl(bb_pattern, all_data$titles, ignore.case=TRUE),]
+bb_vids_cats <- all_data[grepl(bb_pattern, all_data$categories, ignore.case=TRUE),]
+bb_vids_tags <- all_data[grepl(bb_pattern, all_data$tags, ignore.case=TRUE),]
+
+# Generate a binary variable "bareback" for videos containing indicatons of sex without condoms
+bbvids <- rbind(bb_vids_cats, bb_vids_tags, bb_vids_titles, stringsAsFactors = FALSE)
+bbvids <- unique(bbvids)
+bbvids$bareback <- 1
+
+notbbvids <- anti_join(all_data, bbvids)
+notbbvids$bareback <- 0
+all_data <- rbind(bbvids, notbbvids, stringsAsFactors = FALSE)
+
+# Make binary variables in data factors
+all_vids$production <- as.factor(all_vids$production)
+all_vids$bareback <- as.factor(all_vids$bareback)
+
+```
 
 #### EDA
 
 ##### Word frequency in titles
+
+
 
 ##### Popularity Ranking
 
