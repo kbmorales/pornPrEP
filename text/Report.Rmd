@@ -1,0 +1,14 @@
+---
+title: "Report"
+author: "Kenneth Morales"
+date: "October 11, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## I haven't actually started on this document "officially."
+
+But I have done so in an unoffical capacity (see the code.rmd file). I just won't have this in time for the rough draft turn in. Womp.

@@ -105,8 +105,9 @@ x <- 10000
 
 for(i in 1:x) {
   Sys.sleep(runif(1,0,1))
-  if (status_code(GET(url)) == 200) {
-    webpage <- read_html(url)
+  randurl <- HEAD(url)[[1]]
+  if (status_code(GET(randurl)) == 200) {
+    webpage <- read_html(randurl)
     if (length(html_attr(html_nodes(webpage, '.premiumLocked'), name = "class") != 0)) {
       x <- x+1
     } else {

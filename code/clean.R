@@ -1,9 +1,6 @@
 # Purpose: To clean the data prior to analysis
 
-library(rebus)
 library(lubridate)
-library(cowplot)
-library(splitstackshape)
 
 # Work on time series
 
@@ -43,7 +40,7 @@ bysiteindex_data$categories <- as.character(bysiteindex_data$categories)
 bysiteindex_data$titles <- as.character(bysiteindex_data$titles)
 bysiteindex_data$tags <- as.character(bysiteindex_data$tags)
 
-bb_pattern <- "bare|(?:^| )bb(?:$| )|breed|cream|cum dump|felch|raw"
+bb_pattern <- "bare|(?:^| )bb(?:$| )|breed|cream|cum dump|felch|raw|condomless|no condom"
 
 bb_vids_titles <- bysiteindex_data[grepl(bb_pattern, bysiteindex_data$titles, ignore.case=TRUE),]
 bb_vids_cats <- bysiteindex_data[grepl(bb_pattern, bysiteindex_data$categories, ignore.case=TRUE),]
