@@ -64,7 +64,7 @@ isbbcnt.plot <- ggplot(data = catsns, aes(x = year, fill = bareback)) + theme_mi
 plot_grid(catbbcnt.plot, isbbcnt.plot, labels = c("A", "B"), nrow = 2, align = "v", rel_heights = c(1,1))
 
 # By views
-catbb.plot <- ggplot(data = catsns, aes(x = year, y = views, fill = bbcat)) + theme_minimal() + geom_bar(stat = "identity", position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(melttags$year),max(melttags$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position = "bottom") + labs(title = "Videos Categorized Bareback", subtitle = "Total views per year", x="Year", y = "Proportion of Views", fill = "Bareback")
+catbb.plot <- ggplot(data = catsns, aes(x = year, y = views, fill = bbcat)) + theme_minimal() + geom_bar(stat = "identity", position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position = "bottom") + labs(title = "Videos Categorized Bareback", subtitle = "Total views per year", x="Year", y = "Proportion of Views", fill = "Bareback")
 legend <- get_legend(catbb.plot)
 catbb.plot <- catbb.plot + theme(legend.position = "none")
 # It appears that, while videos categorized as Bareback have enjoyed a tremendous boost since 2014, videos that seem to contain bareback content have had a more moderate increase.
@@ -88,10 +88,10 @@ wordcloud(words = cats$category, freq = cats$freq, scale = c(3,.4), random.order
 poprank <- cats[,1]
 for(i in seq_along(poprank)) {
   if(i == 1){
-  poprankyr <- data.frame(cleandata %>% group_by(year) %>% subset(subset = str_detect(categories, poprank[i])) %>% summarise(cat = poprank[i], n = n(), mviews = mean(views)))
+  poprankyr <- data.frame(cleandata %>% group_by(year) %>% subset(subset = str_detect(categories, poprank[i])) %>% summarise(cat = poprank[i], n = n(), tviews = sum(views), mviews = mean(views)))
   }
   if(i >= 2) {
-    poprankyr <- rbind(poprankyr, data.frame(cleandata %>% group_by(year) %>% subset(subset = str_detect(categories, poprank[i])) %>% summarise(cat = poprank[i], n = n(), mviews = mean(views))))
+    poprankyr <- rbind(poprankyr, data.frame(cleandata %>% group_by(year) %>% subset(subset = str_detect(categories, poprank[i])) %>% summarise(cat = poprank[i], n = n(), tviews = sum(views), mviews = mean(views))))
   }
 }
 
@@ -106,6 +106,11 @@ popcats <- topcats[1:5,1]
 popcatspat <- str_c(popcats, collapse = "|")
 popranktop5 <- poprankyr[grep(popcatspat, poprankyr$cat),]
 
+# Pull total views by year
+yeartviews <- 
+
+popranktop5 <- mutate(popranktop5, )
+
 # By year plot
 ggplot(data = popranktop5, aes(x = year, y = mviews)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_line(aes(color = cat)) + scale_x_continuous(breaks=seq(min(popranktop5$year),max(popranktop5$year),1)) + scale_y_log10() + theme(legend.position = "bottom") + labs(title = "Mean Views by Category per Year", subtitle = "Top 5 Categories by Overall Popularity, Mean Views Log Transformed", x="Year", y = "log(Views)", color = "Categories:")
 
@@ -113,7 +118,9 @@ topcatplot <- subset(poprankyr, grepl(str_c(topcats$cat[1:5], collapse = "|"), c
 
 ggplot(data = topcatplot, aes(x = year, y = mviews, colour = cat)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_line() + scale_x_continuous(breaks=seq(min(melttags$year),max(melttags$year),1)) + theme(axis.text.x = element_text(angle=45), legend.position = "bottom") + labs(title = "Trends in Mean Viewcount", subtitle = "Top 5 Categories by Total Views", x="Year", y = "Viewcount", color="Category")
 
+
 # Ratios of bareback to non-bareback films by year
+
 
 # Videos of "Bareback" type per year
 bbbyyear <- as.data.frame(prop.table(table(cleandata$year, cleandata$bareback), 1)*100)
@@ -126,6 +133,8 @@ ggplot(cleandata, aes(x = bareback, y = views)) + theme_minimal() + scale_y_log1
 
 # Total number of videos by bareback category
 ggplot(cleandata, aes(x = year, fill = bareback)) + theme_minimal() + geom_bar(position = "dodge")
+
+ggplot(cleandata, aes(x = year, year = views, fill = bareback)) + theme_minimal() + geom_bar(position = "dodge")
 
 # By production status (I think this is highly suspicious)
 
@@ -154,3 +163,35 @@ ggplot(data = meanviews, aes(year, mean)) + geom_col(aes(fill = bareback))
 ggplot(data = meanviews, aes(year, pmean)) + geom_col(aes(fill = bareback))
 ggplot(aes(x = year, y = watched, colour = bareback), data = meanviews) + geom_point()
 
+
+# PLAY WITH A BUNCH OF STUFF
+# GET MEAN VIEWS BY BB CAT FACTOR BY YEAR
+test <- cleandata %>% group_by(year, bbcat) %>% summarise(mviews = mean(views)) %>% spread(bbcat, mviews, sep = "_") %>% mutate(ratio = bbcat_Yes / bbcat_No) %>% as.data.frame()
+
+# TRY BY PROPORTION
+bbprops <- as.data.frame(prop.table(table(cleandata$year, cleandata$bbcat), 1)*100)
+colnames(bbprops) <- c("year", "bbcat", "prop")
+bbprops <- spread(bbprops, bbcat, prop, sep = "_")
+bbprops$year <- as.numeric(bbprops$year)
+
+
+# See what a plot of all data would look like with regression lines
+# Plot all viewcounts 
+ggplot(data = cleandata, aes(x = year, y = views)) + geom_point(aes(color = bbcat), position = "jitter") + theme_minimal() + scale_y_log10() + geom_smooth(aes(color = bbcat), method = lm, se = FALSE)
+
+# Plot ratio of means
+ggplot(data = meanviews, aes(x = year, y = ratio)) + geom_point() + theme_minimal() + geom_smooth()
+DCdensity(cleandata$year, cutpoint = 2013.99, verbose = TRUE, plot = TRUE, ext.out = FALSE, htest = TRUE)
+
+test <- cleandata %>% group_by(year, bbcat) %>% summarise(n = n())
+plot(density(cleandata$year))
+
+# RDD Test
+
+density(bbprops$year, bw = "nrd0", adjust = 1, kernel = c("gaussian", "epanechnikov", "rectangular", "triangular", "biweight", "cosine", "optcosine"), weights = NULL, window = kernel, width, give.Rkern = FALSE, n = 512, from, to, cut = 3, na.rm = FALSE)
+RDestimate(bbprops$bbcat_Yes ~ bbprops$year, cutpoint = cutoffscore, kernel = "rectangular")
+IKbandwidth(bbprops$year, bbprops$bbcat_Yes, cutpoint = cutoffscore, bw = 1.932473, verbose = TRUE, kernel = "rectangular")
+
+
+test <- lprq(logpviews,accel,h=h,tau=.5)
++         lines(fit$xx,fit$fv,lty=i)
