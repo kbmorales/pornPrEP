@@ -40,6 +40,8 @@ bysiteindex_data$categories <- as.character(bysiteindex_data$categories)
 bysiteindex_data$titles <- as.character(bysiteindex_data$titles)
 bysiteindex_data$tags <- as.character(bysiteindex_data$tags)
 
+# Bareback pattern work
+
 bb_pattern <- "bare|(?:^| )bb(?:$| )|breed|cream|cum dump|felch|raw|condomless|no condom"
 
 bb_vids_titles <- bysiteindex_data[grepl(bb_pattern, bysiteindex_data$titles, ignore.case=TRUE),]

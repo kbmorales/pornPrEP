@@ -1,14 +1,187 @@
 ---
-title: "Report"
+title: "PrEP and Porn: Trends in Popularity of Condom-less Pornographic Videos featuring Men having Sex with Men"
 author: "Kenneth Morales"
-date: "October 11, 2017"
+date: "October 22, 2017"
+header-includes:
+  - \usepackage{amssymb, amsmath}
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+load("final.RDA")
 ```
 
-## I haven't actually started on this document "officially."
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
+packages = c("devtools", "rmarkdown", "httr", "knitr", "rvest", "stringr", "rebus", "dplyr", "lubridate", "moments", "cowplot", "ggplot2", "wordcloud", "ggthemes", "kableExtra", "tidyr", "RColorBrewer", "reshape2", "quantreg", "splines", "captioner")
+lapply(packages,library,character.only=TRUE)
+```
 
-But I have done so in an unoffical capacity (see the code.rmd file). I just won't have this in time for the rough draft turn in. Womp.
+
+
+### Notes
+
+5 pages, 2 figures (in addition to 5 pages)
+2-3 figures, 1-2 tables
+
+readme file:
+all r cdoes, plus a description of what it does
+
+Figures and tables in text!
+
+Figure - second most important. Use bold sentence first to explain main point of figure.
+
+Tables - make it formatted like a real table. 
+
+Final project:
+1. Did you answer the scientific question?
+2. Did you use appropriate statistical methods?
+3. Was your write up simple, clear, and precise?
+4. Was your code repdocuible?
+
+Pick a title: writing a paper for a journal
+Abstract: Four sentence summary: 1.Question 2.Data 3. Method 4. Result
+Introduction: need background detail, what has been done previously, something about the data set that is collected, summary of results
+  # 1st paragraph: why you care / literature search
+  # 2nd: 
+  # 3rd: data used
+  # 4th: method
+  # 5th: results
+No references in introduction
+If figures don't help, dump it - as few figures as possible to tell the quantitative story
+All figures should be numbered and referenced from the text (Figure X).
+Okay to mess with graph so long as it doesn't fuck with data
+
+### Abstract
+
+### Introduction
+
+#### Backgrounbd
+
+Linda Williams compared different kinds of pronography, reavealing a proliferation of "diff'rent strokes for diff'rent folks" shedding light on both a historical and political phenomena. Since sexually explicit media (SEM) first came into its own in the 1970s with the beginnings of a mainstream pornographic film industry and up through the advent of the internet, an ongoing diversification has been a central aspect of contemporary pornography.
+
+The internet opened up niches for producers and broadcasters, targeting a wide range of specific sexual desires. In Williams' early article, sadomasochistic, homosexual, and bisexual pornographies are taken to illustrate a gap between then norm and "perversity," without taking into account the new interactions between categories that stem from their co-existence. Early examinations of the internet celebrated such deviance and diversity. In the age of Pagerank, however, the tyranny of virality exemplifies a counter current: a proliferation of specificities within SEM online, but a growing distance between these niches and the defaults and front pages of SEM websites. The proliferation of pornographic categories not only adds minor fantasies to major fantasies, it also shows how hegemonic desires provide a path to other desires, and how these other desires can be subsumed in hegemonic ones.
+
+SEM is also heterogeneous in content and format, though video SEM is perhaps the most well-known. SEM also has a variety of genres; some SEM portrays sexual behaviours that range from ‘vanilla’ (i.e., kissing, mutual masturbation, oral sex, vaginal sex, anal sex) to ‘kink’ (i.e., extreme penetration, water sports, bondage and discipline, dominance/submission and sadomasochism [BDSM]). Portrayal of condom use is also highly variable in SEM. Studios that primarily feature men having sex with men (particularly those in California) have generally upheld a self-imposed standard of condom use in anal sex starting in the 1990s (Grudzen). Concerns for the health of performers and the effects of SEM vieweship on consumer sex practices have led to policies like California’s Measure B, which mandates the use of condoms in SEM (LATimes article).
+
+While condom-less gay porn ("barebacking") still did exist, it was commonly regarded as kink, fetish, or otherwise deviant, and was often the domain of specialized or heterodox smaller production studios.
+In recent years, however, porn studios have seen their profits being eaten in to by a combination of three phenomenons:
+
+1. The rise of the "tube" sites (such as PornHub), which aggregate and disseminate pornography, usually without a membership fee,
+2. The piracy of pornography and distribution via peer-to-peer networks and forums, as well as through the tube sites, and
+3. burgeoning competition from amateur, DIY pornographers, many of which are capable of providing bareback porn, being unrestrained by mainstream conventions.
+
+With the advent of pre-exposure prophylaxis (PrEP), however, gay porn studios suddenly had an out: they could provide bareback sex for audiences who preferred it while still bearing the mantle of "safer" sex. Most large gay pornographic studios began producing bareback porn in the years following the CDC's endorsement of PrEP in 2014.
+
+PrEP is the preemptive use of a drug to prevent disease in unexposed populations. Currently, the term is used almost exclusively as shorthand for the use of the antiretroval drug Truvada, a two-drug combo manufactured by Gilead Sciences, to prevent the replicaton of HIV. Truvada's regimen as of the time of writing is a single pill taken daily coupled with a follow-up visit with the patient's primary care provider every three months, presumably in perpetuity.
+
+Truvada has had the most adoption success among men who have sex with men in the United States after the CDC's approval. Moves toward widespred adoption of PrEP have been divisive, politically and within gay culture. Concerns include the likelihood of PrEP being used counter to the prescription (such as in the phenomenon of "disco dosing," an ineffective practice in which men take a Truvada pill only around the time they expect sex), the potential for PrEP to undermine existing safer sex policies and social mores, and the incredible cost of the drug (as high as $450 / month). As of 2017, Truvada as PrEP has been approved by 9 countries in addition to the United States as well as the World Health Organization.
+
+##### Objectives
+
+The purpose of this study is to examine whether there is a correlation between the condom utilization practices as employed in gay porn videos and their consumers' viewing habits on a major pornographic website in the United States in the last 5 - 10 years and the new guidelines recommended for Truvada to be used as pre-exposure prophylaxis (PrEP) on May 14, 2014.
+
+### Methods
+
+I explored the popularity of pornographic videos containing men having sex with other men by their total view count among a cross-sectional sample of SEM videos from a popular pornographic video site. [PornHub](www.pornhub.com) is the world's largest pornography website, operating now for 10 years. At the time of writing, it is the 36th most popular site on the web. *CITE* PornHub claims itself as a "platform" and a "video host:" in such a way, PornHub is capable of reaping the benefits of the massive traffic generated to its site while claiming no responsibility for the videos therein. In 2010, the start-up was bought out by a large adult entertainment conglomerate Manwin (now known as MindGeek), which owns several other similar "tube" sites as well as pornographic video production studios.
+
+PornHub organizes video files by "categories" to differentiate between types of content. The larger level domain (www.pornhub.com) contains content most watched by the presumed heterosexual male viewer (men and women having sex with women), while the subdomain for gay content (www.pornhub.com/gayporn) contains SEM most watched by the presumed homosexual male viewer. Videos are separated from these higher level domains by virtue of being categorized as "Gay" or not in the website's category system.
+
+In order to be eligible for inclusion in the analysis, videos had to have been present on PornHub's servers at the time of web scraping (from September 29th - September 30, 2017), be categorized as "Gay," and be among the 500 videos listed in one of the 39 subcategory site index listings (N = 10,693, after removal of duplicates). Videos that, by virtue of categorization into the "Solo Male" category, could not have demonstrated the activity of interest were removed from the sample (1,340 videos). Only one video was scraped with an upload year prior to 2010, and was dropped from the analysis, leaving a final total of 9,353. Analyses were performed with R and videos were scraped with the R package "rvest."*CITE*
+
+Videos associated with one of these category labels, "bareback," was assumed to have the activity of interest: condom-less penetrative anal sex between at least two men. However, upon examination of the scraped data, it was apparent that not all videos containing the activity of interest had been successfully captured by the website's system. Using a simple text pattern<sup>\*</sup>, video titles, tags, and categories were examined for presence of one or more of several terms commonly used to describe the practice in SEM and gay sex argot and were then classified as having bareback sex.
+
+Video upload year from the scraped data was strongly left-skewed (skewnness = `r round(skewness(cleandata$year), digits = 2)`) and slightly leptokurtic (kertosis = `r round(kurtosis(cleandata$year), digits = 2)`). Due to this skewness, demonstrative of a strong recency bias, and the binned nature of the upload year variable, quantile regression was selected as a robust method for identifying the effects on the median yearly viewcount and the quantile regression process was applied for the impact of predictor variables across quantiles. Standard errors were determined using the Hall-Sheather bandwidth rule and the Frisch-Newton algorithm was applied to the basic fitting routine due to considerations of the sample size--both are options available through the "qreg" package in R. *CITE*
+
+The basic model for analyzing the SEM data presumes that the logarithm of penalized total viewcount has a linear splined conditional quantile functions of the form
+
+$$Q_{log(y / p)} \left ( \tau |x \right )= \left\{\begin{matrix}
+\beta _{0} + \beta _{1}x, & x \in \left [0,4.5  \right ]\\ 
+\beta _{0} + \beta _{2}x, & x \in \left [4.5,7  \right ]
+\end{matrix}\right.$$
+
+for $\tau \in \left [0,1 \right ]$. Variables of interest were each video's viewcount and the year in which the video was uploaded. Separate analyses were conducted among videos identified as containing and not containing bareback sex by text pattern identification. Viewcount, the response variable $y$, stood in as a proxy for overall video popularity, and was measured by total video views at time of scraping. Video upload dates binned by year, $x$, were assumed to have been uploaded on Jan 1 of each year. Having no data on a time series for view count accumulation for each video, all videos were assumed to have a constant linear rate of growth from 0 views at origin to their view count when scraped. Total viewcounts were then divided by the total amount of time from presumed upload dates to time of scraping to get an accumulated views estimate one year after upload. This was done in order to control for a detection bias that could privelege older videos, which would have had a longer time to amass views. These values were then log transformed, and the resultant values were approximately normal by graphical assessment of a normal quantile-quantile plot and kernel density estimator. Sample size was too large to use the Shapiro-Wilk test for normality on viewcount data. Upload year was rescaled to begin at earliest upload year, `r min(cleandata$year)` to ease in interpretation. The term was splined at a presumed knot of 4.5 years after first sample upload, roughly corresponding to the CDC endorsement of Truvada as PrEP. Data on all three variables were available for the entire sample.
+
+### Results
+
+![*Figure 1. Test caption.* Test text](~/adsfinalproj/text/fig1.png)
+
+Each of the panels of the Figure illustrate one coordinate of the vector-valued functions for each $\hat{\beta}\left (\tau  \right )$,  
+
+First paragraph of results should be brief description of the type of synthesized tidy data you used
+Report estimates, SD / CI or SE. Not just P value
+Interpret results! Explain the units. All denominators for coefficient will be / year
+Explain quantitative value and why it's important / not important
+
+
+
+#### Participants
+
+#### Descriptive Data
+
+#### Outcome Data
+
+#### Main results
+
+### Discussion
+
+#### Key Results
+
+Summarise what you did.
+
+Explain STI rates among MSM in America nationally (ref CDC)
+
+#### Limitations
+
+The current study operates within several limitations, imposed by the temporality of the study and the format of data storage from PornHub. Due to [PornHub's robots.txt](https://www.pornhub.com/robots.txt), isolating viewship by country of consumer was not possible. However, their own published web traffic data by country allows for a reasonable assumption that the broader trends found without incorporating country code could reflect USA-specific viewing trends: the USA is not only the country that generates the most traffic to PH but also the country with the highest per capita page views (https://www.pornhub.com/insights/2016-year-in-review).
+
+For the purpose of this analysis, the assumption is made that MSM would seek out porn from this gay porn section of the website. PornHub provides a specific [url stem](https://www.pornhub.com/gayporn) to cordon off "gay" porn from the main site's "straight" porn, the top-level domain. Essentially, the category "Gay" is applied to videos in this section of the website, as a high-level video filter. According to PornHub's own usage statistics for 2016, ~3% of visitors from the US are "gay visitors," a statistic that is commensurate with national surveys on American's sexual orientation. This analysis was unable to control for the identity of viewers, however, and 37% of all gay male porn views on PH are from women (https://www.pornhub.com/insights/gay-porn-pride).
+
+Additionally, I was unable to scrape data from videos behind PH's Premium service paywall. It is possible that viewing habits and the videos themselves might differ between Premium subscribers and users who only access content not behind a paywall. However, according to CovenantEyes, a religiousky-based anti-porn advocacy organization modeled after consumer watchdogs, 9 out of 10 users access free pornography.
+
+For this analysis, I am relying on text descriptors, both user-supplied (video title, tags) and host-supplied (categories), in order to determine if a video contains sex between two or more performers without use of condoms. Addtionally, for the "Solo Male" category, which is removed from the sample due to its inability to capture the activity of interest (penetrative sex), there is a possibility for misclassification also. This introduces a potential for incorrect classification, but viewing individual videos is outside of the scope of this project.
+
+Finally, upload dates were binned by year in the analysis, and only total viewcount amassed from the unspecified upload dates to the time of scraping were able to be examined. A finer resolution of upload date, or an ability to know the viewing trends for each video since upload, would have refined the analysis, but were lacking.
+
+#### Interpretation
+
+#### Generalisability
+
+#### Disclosure
+
+The author both participated in the gay SEM industry from 20011 - 2016 and wrote an op-ed against the Los Angeles County proposal mandating condom use in SEM in 2012.
+
+---
+
+<sub>\* - The text pattern used to identify videos containing sex between two men without a condom included the terms "bare," "BB," "breed," "cream," "cum dump", "felch," "raw," "condomless," and "no condom."</sub>
+
+### References
+
+Alexa. The Top 500 Sites on the Web. Alexa Top 500 Global Sites, www.alexa.com/topsites. https://www.alexa.com/topsites
+
+Cooper, D. Mismeasure B. The Huffington Post. Posted November 9, 2012. https://www.huffingtonpost.com/entry/mismeasure-b_b_2094384.html
+
+Eaton, L. A., Cain, D. N., Pope, H., Garcia, J., & Cherry, C. (2012). The relationship between pornography use and sexual behaviors among at-risk HIV-negative men who have sex with men. Sexual Health, 9(2), 166-170. 
+
+Grudzen et al., 2009 Grudzen, C. R., Elliot, M. N., Kerndt, P. R., Shuster, M. A., Brook, R. H., & Gelberg, L. (2009). Condom use and high-risk sexual acts in adult films: A comparison of heterosexual and homosexual films. American Journal of Public Health, 99(S1), S152-S156.
+
+Koenker, R. (2017). quantreg: Quantile Regression. R package version 5.33. https://CRAN.R-project.org/package=quantreg
+
+Nelson, K. M., Simoni, J. M., Morrison, D. M., George, W. H., Leickly, E., Lengua, L. L., & Hawes, S. E. (2014). Sexually explicit online media and sexual risk among men who have sex with men in the United States. Archives of Sexual Behavior, 43, 833-843.
+
+Porn industry declares war on new condom law. (2012, November 8). Los Angeles Times. Retrieved from
+http://latimesblogs.latimes.com/lanow/2012/11/the-porn-industry-is-looking-for-ways-to-derail-a-voter-approved-ballot-measure-that-requires-actors-to-wear-condoms-during-f.html
+
+R Core Team (2017). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
+
+Rosser, B. R. S., Smolenski, D. J., Erickson, D. J., Iantaffi, A., Brady, S. S., Grey, J. A., & Wilkerson, J. M. (2013). The effects of gay sexually explicit media on the HIV risk behavior of men who have sex with men. AIDS and Behavior, 17(4), 1488–1498. doi:10.1007/s10461-013-0454-8
+
+Schrimshaw EW, Antebi-Gruszka N, Downing MJ Jr. Viewing of Internet-Based Sexually Explicit Media as a Risk Factor for Condomless Anal Sex among Men Who Have Sex with Men in Four U.S. Cities. PLoS One. 2016 Apr 27;11(4):e0154439.
+
+Stein, D., Silvera, R., Hagerty, R., & Marmor, M. (2012). Viewing pornography depicting unprotected anal intercourse: Are there implications for HIV prevention among men who have sex with men. Archives of Sexual Behavior, 41(2), 411-419.
+
+Træen, B., Hald, G., Noor, S., Iantaffi, A., Grey, J. A., & Rosser, B. R. S. (2014). The relationship between use of sexually explicit media and sexual risk behavior in men who have sex with men: Exploring the mediating effects of sexual self-esteem and condom use self-efficacy. International Journal of Sexual Health, 26, 13–24. 
+
+Wickham, H. (2016). rvest: Easily Harvest (Scrape) Web Pages. R package version 0.3.2. https://CRAN.R-project.org/package=rvest
+
+Wilkerson, J. M., Inataffi, A., Smolenski, D. J., Brady, S. S., Horvath, K. J., Grey, J. A., & Rosser, B. R. S. (2012). The SEM risk behavior (SRB) model: A new conceptual model of how pornography influences the sexual intentions and HIV risk behavior of MSM. Sexual and Relationship Therapy, 27(3), 217-230.

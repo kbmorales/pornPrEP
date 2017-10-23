@@ -195,3 +195,28 @@ IKbandwidth(bbprops$year, bbprops$bbcat_Yes, cutpoint = cutoffscore, bw = 1.9324
 
 test <- lprq(logpviews,accel,h=h,tau=.5)
 +         lines(fit$xx,fit$fv,lty=i)
+
+# Full sample
+summary(rq(logpviews ~ phyear + cutoff, tau = 0.5))
+
+# Among BB categorized videos
+polyintrd <- rq(logpviews ~ phyear + I(phyear^2) + phyear*cutoff + I(phyear^2)*cutoff + cutoff, subset = bareback == "Yes", tau = 0.5)
+summary(polyintrd)
+
+polyintrd <- rq(logpviews ~ phyear + I(phyear^2) + phyear*cutoff + cutoff, subset = bareback == "Yes", tau = 0.5)
+
+polyintrd <- rq(logpviews ~ phyear + I(phyear^2) + cutoff, subset = bareback == "Yes", tau = 0.5)
+
+# Removing the higher-order polynomials
+intrd <- rq(logpviews ~ phyear*cutoff, subset = bareback == "Yes" & year > 2010, tau = 0.5)
+summary(intrd)
+
+# Remove the interaction term
+cutrd <- rq(logpviews ~ phyear + cutoff, subset = bareback == "Yes" & year > 2010, tau = 0.5)
+summary(cutrd)
+
+# Compare the two smaller models 
+anova(cutrd, intrd)
+
+regplot_2 + geom_abline(intercept = median$coefficients[1], slope = median$coefficients[2], color="black", show.legend = TRUE, linetype="dashed") + 
+  geom_abline(intercept = median$coefficients[1] + median$coefficients[3], slope = median$coefficients[2], color="red", show.legend = TRUE, linetype="dashed")
