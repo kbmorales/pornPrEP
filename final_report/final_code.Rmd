@@ -1,0 +1,464 @@
+---
+title: "Supplement: Code"
+author: "Kenneth Morales"
+date: "October 22, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE, results = "HIDE"}
+options(repos = "https://cloud.r-project.org/")
+packages = c("devtools", "rmarkdown", "httr", "knitr", "rvest", "stringr", "rebus", "dplyr", "lubridate", "moments", "cowplot", "ggplot2", "wordcloud", "ggthemes", "kableExtra", "tidyr", "RColorBrewer", "reshape2", "quantreg")
+not_installed = packages[!(packages %in% installed.packages())]
+if(length(not_installed) > 0 ) {
+  lapply(not_installed,install.packages,character.only=TRUE)
+}
+lapply(packages,library,character.only=TRUE)
+```
+
+### Question
+
+Is there a correlation between the safer sex practices pertaining to condoms employed in gay porn videos and their consumers' viewing habits on the popular pornographic website PornHub (PH) in the United States in the last 5 - 10 years and the new guidelines recommended for Truvada to be used as pre-exposure prophylaxis (PrEP) on May 14, 2014?
+
+Part I. Data Gathering
+Exploratory data analysis of gay male pornographic videos available online and their viewing trends over the past 5-10 years.
+Part II. A Quantile Regression analysis on the relative popularity of "bareback" identified videos over time.
+
+---
+
+### Part I.
+
+#### Obtaining the raw data
+
+Performed on September 30, 2017:
+
+```{r scrape, eval = FALSE}
+
+# Site URL structure: si = site index (TRUE or FALSE, o = order (mv = most viewed), t = time period (w = weekly), cc = country code? (ex.: us)
+
+# Establish category numbers from PH's system
+category_numbers <- c(252, 48, 40, 66, 58, 44, 56, 362, 392, 68, 382, 71, 352, 47, 46, 52, 62, 262, 70, 64, 39, 322, 50, 45, 332, 402, 51, 60, 372, 84, 85, 312, 54, 82, 49, 272, 77, 106, 342)
+category_names <- c("Amateur", "Asian", "Bareback", "Bear", "Big Dick", "Black", "Blowjob", "Casting", "Chubby", "College", "Compilation", "Creampie", "Cumshot", "Daddy", "Euro", "Fetish", "Group", "Handjob", "Hunks", "Interracial", "Japanese", "Jock", "Latino", "Massage", "Mature", "Military", "Muscle", "Pornstar", "POV", "Public", "Reality", "Rough Sex", "Solo Male", "Straight Guys", "Twink", "Uncut", "Vintage", "Virtual Reality", "Webcam")
+names(category_numbers) <- category_names
+
+# Establishes URL system for scraping from index sites
+# Example: https://www.pornhub.com/gay/video?c=40&si=1
+# Only C for category and si for site index (=1 for TRUE)
+
+url_stem <- 'https://www.pornhub.com/gay/video'
+
+urls <- paste0(url_stem, "?c=", category_numbers, "&si=1")
+
+index_col_names <- c("Title", "Length", "Views", "Rating", "URL", "View Key")
+
+trimpatvk <- fixed("https://www.pornhub.com/view_video.php?viewkey=")
+
+dat.list = list()
+
+for(i in seq_along(urls)) {
+  Sys.sleep(runif(1,1,10))
+  webpage <- read_html(urls[i])
+  titles = html_nodes(webpage, '#categoryListContent .index-title') %>% html_text()
+  vid_length = html_nodes(webpage, '#categoryListContent .index-length') %>% html_text()
+  views = html_nodes(webpage, '#categoryListContent .index-views') %>% html_text() %>% str_replace_all("[,]", "") %>% as.numeric()
+  rating = html_nodes(webpage, '#categoryListContent .index-rating') %>% html_text() %>% str_replace("[%]", "") %>% as.numeric()
+  url = html_nodes(webpage, '.index-title a') %>% html_attr("href")
+  viewkey = str_replace(url, pattern = trimpatvk, "")
+  dat.list[[i]] = data.frame(category = category_names[i],titles,vid_length,views,rating, url, viewkey)
+  }
+
+# Compile into single dataframe, identifies duplicates, saves data
+all_data = do.call(rbind,dat.list)
+duplicate <- duplicated(all_data[,7])
+all_data[,"duplicate"] <- duplicate
+save(all_data, file = "data/siteindex_data.Rda")
+
+# Delete duplicate rows -- deletes after first appearance, so first categories will be "overrepresented" (if that matters)
+all_data <- subset(all_data, !duplicated(all_data[,7]))
+all_data <- all_data[,-ncol(all_data)]
+save(all_data, file = "data/siteindex_data_nodup.Rda")
+
+# Grab additional information from each video
+all_data$url <- as.character(all_data$url)
+
+trimpatdate <- dgt(6) %R% "/" %R% dgt(2)
+
+viddat.list = list()
+
+for(i in seq_along(all_data$url)) {
+  Sys.sleep(runif(1,0,1))
+  webpage <- read_html(all_data$url[i])
+  categories <- html_nodes(webpage, '.categoriesWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
+  production <- html_nodes(webpage, '.production') %>% html_text()
+  tags <- html_nodes(webpage, '.tagsWrapper > a') %>% html_text() %>% str_c(collapse = ", ")
+  added <- html_nodes(webpage, xpath = '/html/head/link[5]') %>% html_attr(name = "href") %>% str_extract(pattern = trimpatdate) %>% str_replace("/", "")
+  viddat.list[[i]] = data.frame(viewkey = all_data$viewkey[i],categories,production,tags,added)
+}
+
+# Save lists of video data as a dataframe
+vid_data = do.call(rbind,viddat.list)
+
+# Merge dataframes together, save
+bysiteindex_data <- merge(all_data, vid_data)
+# save(bysiteindex_data, file = "data/siteindexvideo_data.Rda")
+
+```
+
+---
+
+#### Data Cleaning & Processing
+
+##### Date
+
+Videos are uploaded with a hardcoded "Date added" represented as an approximion of the elapsed time from upload to the present day. As such, a video posted on September 1, 2015, would have the text "Added 2 years ago." Videos are binned into upload years.
+
+```{r date, eval = FALSE}
+# constants in terms of days
+year <- 365.24
+month <- 30.44
+week <- 7
+
+bysiteindex_data$added <- as.character(bysiteindex_data$added)
+
+# Generate dates added for videos
+for (i in 1:nrow(bysiteindex_data)) {
+  if (str_detect(bysiteindex_data$added[i], "year") == TRUE)
+    bysiteindex_data$dateadded[i] <- today() - (as.numeric(str_extract(bysiteindex_data$added[i], START %R% number_range(0,9))) * year)
+  if (str_detect(bysiteindex_data$added[i], "month") == TRUE)
+    bysiteindex_data$dateadded[i] <- today() - (as.numeric(str_extract(bysiteindex_data$added[i], START %R% number_range(0,9))) * month)
+  if (str_detect(bysiteindex_data$added[i], "week") == TRUE)
+    bysiteindex_data$dateadded[i] <- today() - (as.numeric(str_extract(bysiteindex_data$added[i], START %R% number_range(0,9))) * week)
+  if (str_detect(bysiteindex_data$added[i], "day") == TRUE)
+    bysiteindex_data$dateadded[i] <- today() - (as.numeric(str_extract(bysiteindex_data$added[i], START %R% number_range(0,9))))
+}
+
+# Will unfortunately have to group videos by year, since we are lacking actual upload dates
+bysiteindex_data$year <- year(bysiteindex_data$dateadded)
+
+# Save at this point
+# save(bysiteindex_data, file = "data/siteindexvidyear_data.Rda")
+
+# Remove extraneous data and reorder columns from site index scraping
+bysiteindex_data <- bysiteindex_data[c("titles", "categories", "tags", "year", "views", "rating", "production", "viewkey", "url")]
+
+bysiteindex_data$categories <- as.character(bysiteindex_data$categories)
+bysiteindex_data$titles <- as.character(bysiteindex_data$titles)
+bysiteindex_data$tags <- as.character(bysiteindex_data$tags)
+```
+
+Load in data: 
+
+```{r loaddata, message=FALSE, warning=FALSE}
+load("./siteindexvidyear_data.Rda")
+all_vids <- bysiteindex_data
+# Capture n for sample table
+n1 <- nrow(all_vids)
+```
+
+#### Categories
+
+Videos on PH have a system-defined organization called "Categories." A quick word cloud will give us a sense of what the category breakdown is for the videos that have been scraped: 
+
+```{r catcloud, echo=TRUE}
+# Wordcloud of Categories
+cats <- str_split(all_vids$categories, ", ")
+cats <- data.frame(category = names(table(unlist(cats))), freq=as.numeric(table(unlist(cats)))) %>% arrange(desc(freq))
+cats$category <- as.character(cats$category)
+wordcloud(words = cats$category, freq = cats$freq, scale = c(6,1), random.order=FALSE, rot.per=0.1, colors=brewer.pal(8, "Dark2"))
+```
+
+Several of these categories would be useless to analyze: some specify the video format ("HD," "Virtual Reality"), the type of camerawork ("POV," "Webcam"), or the performer's relationship to PH itself ("Verified Models," "Verified Amateurs," "Exclusive"). Additionlly, the "Gay" category tag is useless for this analysis, since that is how the PH website filters videos for the straight and gay porn domains.
+
+```{r catclean}
+# Remove analytically useless categories
+badcats <- "Gay|HD|Virtual Reality|Verified Amateurs|Verified Models|Exclusive|POV|Webcam"
+cats <- cats[!str_detect(cats$category, badcats), ]
+wordcloud(words = cats$category, freq = cats$freq, scale = c(2.5,1), random.order=FALSE, rot.per=0.1, colors=brewer.pal(8, "Dark2"))
+```
+
+The category "Bareback" appears to be one of the most popular video categories:
+
+```{r catgraph, warning=FALSE}
+ggplot(data = cats, aes(x = category, y = freq)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_col() + coord_flip() + scale_x_discrete(limits=rev(cats$category[1:20])) + theme(legend.position = "bottom") + labs(title = "Total Videos by Category", subtitle = "Top 20 Categories", x="", y = "Total number of videos")
+```
+
+Additionally, one category sticks out as being contrary to the analysis: "Solo Male." Videos with only one performer are incapable of containing either condom-utlizing or condomless sex.
+
+```{r nosolos}
+# Remove videos with only a single male performer in them as identified by category
+nosolos <- all_vids[- grep("Solo Male", all_vids$categories),]
+# Capture n for sample table
+n2 <- nrow(nosolos)
+```
+
+##### Popularity Rankings as Given by View Count by Category
+
+Popularity ranking reveals categories by the number of views generated by all videos in a given category over a time span, weighted by the number of these videos. This shows the repetition of views on videos in a given category, revealing the consistency of viewers’ requests for this content. These rankings tell us what categories were the most popular, and may point to content for which demand surpasses what is offered by uploaders.
+
+To begin with, we will identify the most popular categories as given by view count of videos over the entire sample:
+
+```{r poprank, warning=FALSE}
+# Calculate n, total views, and mean views by category and year
+poprank <- cats[,1]
+for(i in seq_along(poprank)) {
+  if(i == 1){
+  poprankyr <- data.frame(nosolos %>% group_by(year) %>% subset(subset = str_detect(categories, poprank[i])) %>% summarise(cat = poprank[i], n = n(), tviews = sum(views), mviews = mean(views)))
+  }
+  if(i >= 2) {
+    poprankyr <- rbind(poprankyr, data.frame(nosolos %>% group_by(year) %>% subset(subset = str_detect(categories, poprank[i])) %>% summarise(cat = poprank[i], n = n(), tviews = sum(views), mviews = mean(views))))
+  }
+}
+
+# Identify the most popular categories overall, and to use to filter categorical popularity ranks
+topcats <- poprankyr %>% group_by(cat) %>% summarise(tviews = sum(mviews*n), count = sum(n)) %>% arrange(desc(tviews))
+
+ggplot(data = topcats, aes(x = cat, y = tviews)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_col() + coord_flip() + scale_x_discrete(limits=rev(topcats$cat[1:20])) + theme(legend.position = "bottom") + labs(title = "Total Views by Category", subtitle = "Top 20 Categories", x="Category", y = "Total Viewcount")
+```
+
+It appears that while Bareback was one of the most popular categories for video uploads, it is the most viewed category over the entire sample.
+
+A quick glimpse at the rankings over time of the top 5 most viewed overall categories: 
+
+```{r topcatsyear}
+topcats <- as.data.frame(topcats)
+popcats <- topcats[1:5,1]
+popcatspat <- str_c(popcats, collapse = "|")
+popranktop5 <- poprankyr[grep(popcatspat, poprankyr$cat),]
+popranktop5 <- popranktop5[,c(1,2,4)] %>% spread(cat, tviews)
+viewtotalyr <- nosolos %>% group_by(year) %>% summarise(total = sum(views)) %>% data.frame()
+popranktop5 <- merge(popranktop5[-1,], viewtotalyr[-1,])
+popranktop5[,2:6] <- popranktop5[,2:6] / popranktop5[,7]
+popranktop5 <- gather(popranktop5[,-7], year)
+colnames(popranktop5) <- c("year", "cat", "prop")
+
+# By year plot
+top5cats <- ggplot(data = popranktop5, aes(x = year, y = prop)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_line(aes(color = cat)) + scale_x_continuous(breaks=seq(min(popranktop5$year),max(popranktop5$year),1)) + theme(legend.position = "bottom") + labs(title = "Proportion of Video Views per Year by Category", subtitle = "Top 5 Categories by Overall Popularity", x="Year", y = "Proportion of Views", color = "Categories:")
+top5cats
+```
+
+##### Constructing Key Variable: Presence of Penetrative Sex without a Condom
+
+Thus far only the PH-dictated organizational method has been explored (category). User-submitted categorization methods (titles of videos and "tags") will be scanned for terms commonly associated with sex without condoms in gay slang. Though "Bareback" is a category of videos, this category may not fully capture all videos that contain penetrative sex without the use of condoms.
+
+```{r idbbvids}
+# Generate a pattern to detect for sex without condoms
+bb_pattern <- "bare|(?:^| )bb(?:$| )|breed|cream|cum dump|felch|raw|condomless|no condom"
+
+# Scan titles, tags, and categories for indications of barebacking
+nosolos$categories <- as.character(nosolos$categories)
+nosolos$titles <- as.character(nosolos$titles)
+nosolos$tags <- as.character(nosolos$tags)
+
+bb_vids_titles <- nosolos[grepl(bb_pattern, nosolos$titles, ignore.case=TRUE),]
+bb_vids_cats <- nosolos[grepl(bb_pattern, nosolos$categories, ignore.case=TRUE),]
+bb_vids_tags <- nosolos[grepl(bb_pattern, nosolos$tags, ignore.case=TRUE),]
+
+# Generate a binary variable "bareback" for videos containing indicatons of sex without condoms
+bbvids <- rbind(bb_vids_cats, bb_vids_tags, bb_vids_titles, stringsAsFactors = FALSE)
+bbvids <- unique(bbvids)
+bbvids$bareback <- 1
+
+notbbvids <- anti_join(nosolos, bbvids)
+notbbvids$bareback <- 0
+nosolos <- rbind(bbvids, notbbvids, stringsAsFactors = FALSE)
+
+# Make binary bareback variable in data factors
+nosolos$bareback <- factor(nosolos$bareback, labels = c("No", "Yes"))
+
+catsns <- nosolos[c("categories", "year", "views", "bareback")]
+catsns$bbcat <- factor(ifelse(str_detect(catsns$categories, "Bareback"), 1, 0), labels = c("No", "Yes"))
+bbcomp <- data.frame(table(catsns$bbcat, catsns$bareback))
+names(bbcomp) <- c("BB Category", "BB Pattern", "Freq")
+
+# Need to pretty this up
+kable(bbcomp, format = "html", booktabs = T)
+```
+
+There is substantial divergence from the Bareback categorized videos and those identified by the pattern:
+
+```{r bbcompplots, echo=TRUE}
+# Compare Number of Videos Categorized Bareback to those Identified as BB
+# By count
+catbbcnt.plot <- ggplot(data = catsns, aes(x = year, fill = bbcat)) + theme_minimal() + geom_bar(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position="none") + labs(title = "Videos Categorized Bareback", subtitle = "Proportion Uploaded by Year", x="Year", y = "Proportion of Total Videos", fill = "Bareback")
+isbbcnt.plot <- ggplot(data = catsns, aes(x = year, fill = bareback)) + theme_minimal() + geom_bar(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position= c(0.9,1.35)) + labs(title = "Videos Containing Bareback Pattern", subtitle = "Proportion Uploaded by Year", x="Year", y = "Proportion", fill = "Bareback")
+
+plot_grid(catbbcnt.plot, isbbcnt.plot, labels = c("A", "B"), nrow = 2, align = "v", rel_heights = c(1,1))
+
+# By views
+catbbview.plot <- ggplot(data = catsns, aes(x = year, y = views, fill = bbcat)) + theme_minimal() + geom_col(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position="none") + labs(title = "Videos Categorized Bareback", subtitle = "Proportion Uploaded by Year", x="Year", y = "Proportion of Total Views", fill = "Bareback")
+
+# Tailor for pub
+catsns <- catsns %>% arrange(year)
+catsns <- catsns[-1, ]
+catbbcnt2.plot <- ggplot(data = catsns, aes(x = year, fill = bbcat)) + theme_minimal() + geom_bar(position = "dodge") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position= c(0.1,0.9), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(title = "Videos Categorized as Bareback vs. Not", subtitle = "Uploaded by Year", x="Year", y = "Total Videos", fill = "Bareback")
+
+catbbcnt2.plot
+```
+
+*AS YOU CAN SEE HERE, THERE IS A QUITE A DIFFERENCE BETWEEN THE PROPORTIONS OF VIDEOS UPLOADED BY YEAR BETWEEN PORNHUB'S BAREBACK CATEGORY AND MY OWN BAREBACK PATTERN RECOGNITION SYSTEM, WHICH IS INTERESTING WHEN YOU CONSIDER, FOR EXAMPLE, THAT NOT ONLY A) IF MY HYPOTHESIS WAS CORRECT, USERS MIGHT HAVE SOUGHT OUT / UPLOADED MORE BAREBACK CATEGORY VIDEOS AFTER THE CDC GUIDELINES POSTED, AND B) THAT THE "GAY" CATEGORY IS HOW PORNHUB FILTERS THE GAY PORN (WWW.PORNHUB.COM/GAYPORN) FROM THE "STRAIGHT" PORN (WWW.PORNHUB.COM)*
+
+The dataset will undergo a final polish pass before analysis.
+
+```{r cleanup}
+cleandata <- nosolos[c("titles", "categories", "tags", "year", "views", "rating", "production", "viewkey", "url", "bareback")]
+cleandata <- arrange(cleandata, year)
+# Dropping the only video posted in 2009
+cleandata <- cleandata[-1,]
+# Generating a dummy variable for bareback category
+cleandata$bbcat <- factor(ifelse(str_detect(cleandata$categories, "Bareback"), 1, 0), labels = c("No", "Yes"))
+```
+
+---
+
+### Part II.
+
+#### Analysis 1 - Quantile Regression
+
+##### Assumptions: 
+
+  * That each video was uploaded in a uniform rectangular distrubition across the year in which it was added;
+  * Having no data on a time series for view count accumulation, all videos are assumed to have a constant linear rate of growth from 0 views when uploaded to their view count when scraped, with the addition of a modifier accounting for the time of scraping (approximately 3/4 of the way through the year).
+
+##### Specifications
+
+To begin the regression, we will have to normalize some of the data.
+
+*Dependent Variable: Quantiles of Log-transformed Yearly View Count*
+First, I have generated a view count multiplier. This takes the form of a penalty and is applied to each video's view count if the upload year was prior to 2017 in order to standardize the data to total potential views over the span of a year's time. Older videos will have a larger opporunity to gather more views, so we are fixing the time period for view generation at 1 year. As videos were scraped with still a quarter of the year left at approximately 2017.75, videos uploaded this year will have their viewcount multipled by ~1.33. In addition to applying this penalty, yearly total views will be log-transformed to ease in evaluation. This also has the effect of allowing our response variable to follow an approximately normal distribution. While the median of this measure will be our major focus, other quantiles of this variable will be examined.
+
+```{r penalty}
+# Create year penalty for videos
+cleandata$penalty <- 1/(2017.75 - cleandata$year)
+cleandata$pviews = round(cleandata$views * cleandata$penalty)
+cleandata$logpviews = log10(round(cleandata$views * cleandata$penalty))
+plot(density(cleandata$logpviews))
+qqnorm(cleandata$logpviews)
+```
+
+*Variable of Interest: Upload Year*
+The publication of the CDC guidelines recommending Truvada for PrEP among high-risk groups of individuals (serodiscordant couples, MSM who have sex without a condom or has been diagnosed with a sexually transmitted infection in the past 6 months and who is not in a mutually monogamous relationship with a partner who has recently tested negative for HIV, heterosexual people "at high risk" for contracting HIV from partner, and people who inject drugs who have shared equipment when injecting in the last 6 months) occurred on May 14, 2014. For the purposes of this analysis, to correspond with the year binning and to ease in model reading (and to incorporate a small amount of lag in the effect of announcement), the cutoff point will be 2014.5.
+
+As upload year is treated as a continuous variable in this analysis, rather than discrete bins, such a cutoff will allow for as precise a regression as possible given the binning restraints. Upload year will be rescaled to east in model interpretation.
+
+```{r cutoff}
+# Set cutoff to 2014.5
+cutoffscore <- 2014.5
+# Recount year variable to make intercept more meaningful:
+cleandata$phyear <- cleandata$year - min(cleandata$year)
+# Assign videos to being uploaded before cutoff or not
+cleandata$cutoff <- ifelse(cleandata$year < cutoffscore, 0, 1)
+```
+
+*Independent Variables*
+
+Bareback videos, as identified by text pattern recognition, coded as 0 or 1.
+Video rating, z-transformed.
+
+```{r zrating}
+cleandata$nrating <- (cleandata$rating - mean(cleandata$rating)) / sd(cleandata$rating)
+attach(cleandata)
+```
+
+##### Inference on the Quantile Regression Process
+
+An examination of the all of the distinct quantile regression solutions for this model demonstrates a general opposing trend between bareback categorization and and upload year and their effect on viewcount. For videos with in the lower half of the viewcount distribution, upload year seems to have a stronger effect on the viewcount, reflecting perhaps the greater potential videos that were posted sooner have to garner more views. On the other hand, as viewcounts climb, whether or not that video is categorized as bareback or not has a greater effect.
+
+```{r qrprocess}
+plot(summary(rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", tau = 2:98/100)), mfrow = c(1,3))
+plot(summary(rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", tau = 2:98/100)), mfrow = c(1,3))
+```
+
+The Khmaladze test is a test of the hypothesis that the linear model specification is of the location shift or location-scale shift forms. While it is clear from the quantile regression plots that we are not dealing with a location-shift effect, as the coefficient curves would mimic the intercept, it can also serves as a statistical test of whether the distributions follow a location-scale shift effect.
+
+```{r KTest}
+# Khmaladze Test for equality of slopes at different quantiles
+bbyKTestLS <- KhmaladzeTest(logpviews ~ phyear + phyear:cutoff, subset = bbcat == "Yes", taus = -1, nullH = "location-scale", trim = c(0.05, 0.95))
+bbyKTestL <- KhmaladzeTest(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", taus = -1, nullH = "location")
+bbnKTestLS <- KhmaladzeTest(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", taus = -1, nullH = "location-scale", trim = c(0.05, 0.95))
+bbnKTestL <- KhmaladzeTest(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", taus = -1, nullH = "location")
+```
+
+Based on this analysis, and excluding the two most extreme quantiles in (0.05, 0.95), the joint test statistic for the model testing location-scale is `r bbyKTestLS$Tn` and `r bbnKTestLS$Tn` for the bareback categorized and not such categorized videos, respectively. The asymptotic critical values at 1% is 4.119 (see [Koenker and Xiao (2001)](http://www.econ.uiuc.edu/~roger/research/inference/khmal6ap.pdf). It cannot be discounted that the model specification is of the location-scale shift form.
+
+#### Splined Quantile Regression, by Bareback classification 
+
+##### Specifications:
+
+Y = Log base 10 median viewcount of films, by bareback categorization
+X = Year video was uploaded (rescaled as years 0 - 8)
+
+```{r regdisc}
+# Compare median regressions for bb and non-bb categorized videos
+bbmed <- rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", tau = 0.5)
+notbbmed <- rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", tau = 0.5)
+
+mrbby <- summary(rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", tau = 2:98/100))
+mrbbn <- summary(rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", tau = 2:98/100))
+plot(mrbby, mfrow = c(1,3))
+plot(mrbbn, mfrow = c(1,3))
+
+regplot <- ggplot(cleandata, aes(x = phyear, y = logpviews)) + scale_x_continuous(breaks = unique(phyear), labels=as.character(unique(year))) + theme_minimal() + theme(legend.position = "bottom") + scale_color_brewer(palette="Dark2")
+
+regplot_2 <- regplot + 
+  geom_point(aes(color = bbcat), position = "jitter", size = 0.5) + 
+  labs(title = "Log Views of Videos by Bareback Indication", subtitle = "Median Regressions", x="Year", y = "log(View Count)", color = "Bareback") + 
+  geom_segment(aes(x = 0, y = notbbmed$coefficients[1], xend = 4.5, yend =  notbbmed$coefficients[1] + notbbmed$coefficients[2]*4.5), size = 1) + 
+  geom_segment(aes(x = 4.5, y = notbbmed$coefficients[1] + notbbmed$coefficients[2]*4.5, xend = 7, yend = notbbmed$coefficients[1] + notbbmed$coefficients[2]*7 + notbbmed$coefficients[3]*7), size = 1) + 
+  geom_segment(aes(x = 0, y = bbmed$coefficients[1], xend = 4.5, yend = bbmed$coefficients[1] + bbmed$coefficients[2]*4.5), linetype = "dashed", size = 1, color = "red") + 
+  geom_segment(aes(x = 4.5, y = bbmed$coefficients[1] + bbmed$coefficients[2]*4.5, xend = 7, yend = bbmed$coefficients[1] + bbmed$coefficients[2]*7 + bbmed$coefficients[3]*7), linetype = "dashed", size = 1, color = "red") +
+  geom_vline(xintercept = 4.5, linetype = "dotted")
+regplot_2 + geom_quantile(aes(linetype = bbcat), quantiles = c(0.2, 0.4, 0.6, 0.8), method = "rqss") + labs(linetype = "Quintiles: Bareback")
+
+taus <- c(1:9/10)
+quantbb <- rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", tau = taus)
+quantnotbb <- rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", tau = taus)
+
+# Coefficient tables and t-tests significance
+
+for(i in 1:length(taus)){
+  kable(quantbb[[1]][,i], format = "html", digits = 4, booktabs = T)
+  kable(quantnotbb[[1]][,i], format = "html", digits = 4, booktabs = T)
+}
+
+```
+
+##### Quantile Regression Analysis: Whole sample, Controlling for Bareback
+
+Controlling for bareback indication:
+
+```{r rqgraph}
+
+
+# Median
+median <- rq(logpviews ~ phyear + bareback, tau = 0.5)
+
+# Multipe Quantiles
+taus <- c(.2,.4,.6,.8)
+quantiles <- rq(logpviews ~ phyear + phyear:cutoff, tau = taus)
+regplot_1 <- regplot + 
+  geom_point(aes(color = bareback), position = "jitter", size = 0.5) + 
+  labs(title = "Log Views of Videos by Bareback Indication", x="Year", y = "log(View Count)", color = "Bareback Category") + 
+  geom_abline(intercept = median$coefficients[1], slope = median$coefficients[2], color="black") + 
+  geom_abline(intercept = median$coefficients[1] + median$coefficients[3], slope = median$coefficients[2], color="red")
+  for(i in 1:length(taus)){
+  regplot_1 <- regplot_1 + 
+    geom_abline(intercept = quantiles$coefficients[[1,i]], slope = quantiles$coefficients[[2,i]], color="black", linetype="dashed") +
+    geom_abline(intercept = quantiles$coefficients[[1,i]] + quantiles$coefficients[[3,i]], slope = quantiles$coefficients[[2,i]], color="red", linetype="dashed")
+  }
+regplot_1
+```
+
+Here we see, controlling for bareback indication, videos classified as bareback in this model have a higher median viewcount. Additionally, as tau increases, bareback-classified videos steadily increase their relative quantile viewcount, while at lower quantiles bareback videos perform about the same. The bareback coefficient itself moves from being a statistically significant for the lowest quantile, to being insignificant through to the median, to providing a significant increase in log view count at the higher quantiles.
+
+```{r rqstats}
+# Coefficient tables and t-tests significance
+taus <- c(.05,.1,.25,.5,.75,.90,.95)
+coefftab <- summary(rq(logpviews ~ phyear + bareback, tau = taus))
+
+for(i in 1:length(taus)){
+  kable(coefftab[[i]]$coefficients, format = "html", digits = 4, booktabs = T)
+  }
+```

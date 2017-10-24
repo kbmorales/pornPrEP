@@ -7,21 +7,15 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
-
 ```
 
-Add in packages
-
-use if statement to check in packages are installed and if not install them
-
-not_installed = [packages[!(packages %in% installed.packages())]]
-
-if(length(not_installed) > 0 ) {
-
-}
-
 ```{r libraries, message=FALSE, warning=FALSE, include=FALSE, results = "HIDE"}
-packages = c("devtools", "rmarkdown", "httr", "knitr", "rvest", "stringr", "rebus", "dplyr", "lubridate", "moments", "cowplot", "ggplot2", "wordcloud", "ggthemes", "kableExtra", "tidyr", "RColorBrewer", "reshape2", "quantreg", "splines")
+options(repos = "https://cloud.r-project.org/")
+packages = c("devtools", "rmarkdown", "httr", "knitr", "rvest", "stringr", "rebus", "dplyr", "lubridate", "moments", "cowplot", "ggplot2", "wordcloud", "ggthemes", "kableExtra", "tidyr", "RColorBrewer", "reshape2", "quantreg")
+not_installed = packages[!(packages %in% installed.packages())]
+if(length(not_installed) > 0 ) {
+  lapply(not_installed,install.packages,character.only=TRUE)
+}
 lapply(packages,library,character.only=TRUE)
 ```
 
@@ -109,7 +103,7 @@ vid_data = do.call(rbind,viddat.list)
 
 # Merge dataframes together, save
 bysiteindex_data <- merge(all_data, vid_data)
-save(bysiteindex_data, file = "data/siteindexvideo_data.Rda")
+# save(bysiteindex_data, file = "data/siteindexvideo_data.Rda")
 
 ```
 
@@ -145,7 +139,7 @@ for (i in 1:nrow(bysiteindex_data)) {
 bysiteindex_data$year <- year(bysiteindex_data$dateadded)
 
 # Save at this point
-save(bysiteindex_data, file = "data/siteindexvidyear_data.Rda")
+# save(bysiteindex_data, file = "data/siteindexvidyear_data.Rda")
 
 # Remove extraneous data and reorder columns from site index scraping
 bysiteindex_data <- bysiteindex_data[c("titles", "categories", "tags", "year", "views", "rating", "production", "viewkey", "url")]
@@ -239,7 +233,8 @@ popranktop5 <- gather(popranktop5[,-7], year)
 colnames(popranktop5) <- c("year", "cat", "prop")
 
 # By year plot
-ggplot(data = popranktop5, aes(x = year, y = prop)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_line(aes(color = cat)) + scale_x_continuous(breaks=seq(min(popranktop5$year),max(popranktop5$year),1)) + theme(legend.position = "bottom") + labs(title = "Proportion of Video Views per Year by Category", subtitle = "Top 5 Categories by Overall Popularity", x="Year", y = "Proportion of Views", color = "Categories:")
+top5cats <- ggplot(data = popranktop5, aes(x = year, y = prop)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_line(aes(color = cat)) + scale_x_continuous(breaks=seq(min(popranktop5$year),max(popranktop5$year),1)) + theme(legend.position = "bottom") + labs(title = "Proportion of Video Views per Year by Category", subtitle = "Top 5 Categories by Overall Popularity", x="Year", y = "Proportion of Views", color = "Categories:")
+top5cats
 ```
 
 ##### Constructing Key Variable: Presence of Penetrative Sex without a Condom
@@ -285,10 +280,20 @@ There is substantial divergence from the Bareback categorized videos and those i
 ```{r bbcompplots, echo=TRUE}
 # Compare Number of Videos Categorized Bareback to those Identified as BB
 # By count
-catbbcnt.plot <- ggplot(data = catsns, aes(x = year, fill = bbcat)) + theme_minimal() + geom_bar(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position="none") + labs(title = "Videos Categorized Bareback", subtitle = "Proportion Uploaded by Year", x="Year", y = "Proportion", fill = "Bareback")
+catbbcnt.plot <- ggplot(data = catsns, aes(x = year, fill = bbcat)) + theme_minimal() + geom_bar(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position="none") + labs(title = "Videos Categorized Bareback", subtitle = "Proportion Uploaded by Year", x="Year", y = "Proportion of Total Videos", fill = "Bareback")
 isbbcnt.plot <- ggplot(data = catsns, aes(x = year, fill = bareback)) + theme_minimal() + geom_bar(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position= c(0.9,1.35)) + labs(title = "Videos Containing Bareback Pattern", subtitle = "Proportion Uploaded by Year", x="Year", y = "Proportion", fill = "Bareback")
 
 plot_grid(catbbcnt.plot, isbbcnt.plot, labels = c("A", "B"), nrow = 2, align = "v", rel_heights = c(1,1))
+
+# By views
+catbbview.plot <- ggplot(data = catsns, aes(x = year, y = views, fill = bbcat)) + theme_minimal() + geom_col(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position="none") + labs(title = "Videos Categorized Bareback", subtitle = "Proportion Uploaded by Year", x="Year", y = "Proportion of Total Views", fill = "Bareback")
+
+# Tailor for pub
+catsns <- catsns %>% arrange(year)
+catsns <- catsns[-1, ]
+catbbcnt2.plot <- ggplot(data = catsns, aes(x = year, fill = bbcat)) + theme_minimal() + geom_bar(position = "dodge") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(catsns$year),max(catsns$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position= c(0.1,0.9), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(title = "Videos Categorized as Bareback vs. Not", subtitle = "Uploaded by Year", x="Year", y = "Total Videos", fill = "Bareback")
+
+catbbcnt2.plot
 ```
 
 *AS YOU CAN SEE HERE, THERE IS A QUITE A DIFFERENCE BETWEEN THE PROPORTIONS OF VIDEOS UPLOADED BY YEAR BETWEEN PORNHUB'S BAREBACK CATEGORY AND MY OWN BAREBACK PATTERN RECOGNITION SYSTEM, WHICH IS INTERESTING WHEN YOU CONSIDER, FOR EXAMPLE, THAT NOT ONLY A) IF MY HYPOTHESIS WAS CORRECT, USERS MIGHT HAVE SOUGHT OUT / UPLOADED MORE BAREBACK CATEGORY VIDEOS AFTER THE CDC GUIDELINES POSTED, AND B) THAT THE "GAY" CATEGORY IS HOW PORNHUB FILTERS THE GAY PORN (WWW.PORNHUB.COM/GAYPORN) FROM THE "STRAIGHT" PORN (WWW.PORNHUB.COM)*
@@ -328,7 +333,7 @@ cleandata$penalty <- 1/(2017.75 - cleandata$year)
 cleandata$pviews = round(cleandata$views * cleandata$penalty)
 cleandata$logpviews = log10(round(cleandata$views * cleandata$penalty))
 plot(density(cleandata$logpviews))
-qqnorm(logpviews)
+qqnorm(cleandata$logpviews)
 ```
 
 *Variable of Interest: Upload Year*
@@ -338,9 +343,11 @@ As upload year is treated as a continuous variable in this analysis, rather than
 
 ```{r cutoff}
 # Set cutoff to 2014.5
-cutoff <- 2014.5 - min(cleandata$year)
+cutoffscore <- 2014.5
 # Recount year variable to make intercept more meaningful:
 cleandata$phyear <- cleandata$year - min(cleandata$year)
+# Assign videos to being uploaded before cutoff or not
+cleandata$cutoff <- ifelse(cleandata$year < cutoffscore, 0, 1)
 ```
 
 *Independent Variables*
@@ -353,30 +360,28 @@ cleandata$nrating <- (cleandata$rating - mean(cleandata$rating)) / sd(cleandata$
 attach(cleandata)
 ```
 
-
-
 ##### Inference on the Quantile Regression Process
 
 An examination of the all of the distinct quantile regression solutions for this model demonstrates a general opposing trend between bareback categorization and and upload year and their effect on viewcount. For videos with in the lower half of the viewcount distribution, upload year seems to have a stronger effect on the viewcount, reflecting perhaps the greater potential videos that were posted sooner have to garner more views. On the other hand, as viewcounts climb, whether or not that video is categorized as bareback or not has a greater effect.
 
-`r plot(rq(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "Yes", tau = 2:98/100), mfrow = c(1,3))`
+```{r qrprocess}
+plot(summary(rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", tau = 2:98/100)), mfrow = c(1,3))
+plot(summary(rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", tau = 2:98/100)), mfrow = c(1,3))
+```
 
-The Khmaladze test is a test of the hypothesis that the linear model specification is of the location shift or location-scale shift forms.
+The Khmaladze test is a test of the hypothesis that the linear model specification is of the location shift or location-scale shift forms. While it is clear from the quantile regression plots that we are not dealing with a location-shift effect, as the coefficient curves would mimic the intercept, it can also serves as a statistical test of whether the distributions follow a location-scale shift effect.
 
 ```{r KTest}
 # Khmaladze Test for equality of slopes at different quantiles
-bbyKTestLS <- KhmaladzeTest(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "Yes", taus = -1, nullH = "location-scale", trim = c(0.05, 0.95))
-bbyKTestL <- KhmaladzeTest(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "Yes", taus = -1, nullH = "location")
-bbnKTestLS <- KhmaladzeTest(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "No", taus = -1, nullH = "location-scale", trim = c(0.05, 0.95))
-bbnKTestL <- KhmaladzeTest(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "No", taus = -1, nullH = "location")
+bbyKTestLS <- KhmaladzeTest(logpviews ~ phyear + phyear:cutoff, subset = bbcat == "Yes", taus = -1, nullH = "location-scale", trim = c(0.05, 0.95))
+bbyKTestL <- KhmaladzeTest(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", taus = -1, nullH = "location")
+bbnKTestLS <- KhmaladzeTest(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", taus = -1, nullH = "location-scale", trim = c(0.05, 0.95))
+bbnKTestL <- KhmaladzeTest(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", taus = -1, nullH = "location")
 ```
 
-Based on this analysis, and excluding the two most extreme quantiles in (0.05, 0.95), the joint test statistic for the model testing location-scale is `r KTestLS$Tn` and for location is `r KTestL$Tn`. The asymptotic critical values at 1% is 5.350 4.523
-4.091 (see [Koenker and Xiao (2001)](http://www.econ.uiuc.edu/~roger/research/inference/khmal6ap.pdf). Thus, we assume the model specification is of the location-scale shift form. Notably, the bareback categorization remains highly significant under both null hypotheses (`r KTestLS$THn[1]` and `r KTestLS$THn[2]`).
+Based on this analysis, and excluding the two most extreme quantiles in (0.05, 0.95), the joint test statistic for the model testing location-scale is `r bbyKTestLS$Tn` and `r bbnKTestLS$Tn` for the bareback categorized and not such categorized videos, respectively. The asymptotic critical values at 1% is 4.119 (see [Koenker and Xiao (2001)](http://www.econ.uiuc.edu/~roger/research/inference/khmal6ap.pdf). It cannot be discounted that the model specification is of the location-scale shift form.
 
-Given the location-scale shift formulation, an analysis which utilizes the a shift in scale, or slope, of the quantile regression will be examined next. 
-
-#### Analysis 2 - Splined Quantile Regression, by Bareback classification 
+#### Splined Quantile Regression, by Bareback classification 
 
 ##### Specifications:
 
@@ -385,32 +390,38 @@ X = Year video was uploaded (rescaled as years 0 - 8)
 
 ```{r regdisc}
 # Compare median regressions for bb and non-bb categorized videos
-bbmed <- rq(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "Yes", tau = 0.5)
-notbbmed <- rq(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "No", tau = 0.5)
-taus <- c(.25,.75)
-quantbb <- rq(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "Yes", tau = taus)
-quantnotbb <- rq(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "No", tau = taus)
+bbmed <- rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", tau = 0.5)
+notbbmed <- rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", tau = 0.5)
 
-mrbby <- summary(rq(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "Yes", tau = 2:98/100))
-mrbbn <- summary(rq(logpviews ~ bs(phyear, degree=1, knots= cutoff), subset = bareback == "No", tau = 2:98/100))
-par(yaxs = "i")
+mrbby <- summary(rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", tau = 2:98/100))
+mrbbn <- summary(rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", tau = 2:98/100))
 plot(mrbby, mfrow = c(1,3))
 plot(mrbbn, mfrow = c(1,3))
 
-regplot <- ggplot(cleandata, aes(x = phyear, y = logpviews)) + scale_x_continuous(breaks = unique(phyear), labels=as.character(unique(year))) + theme_minimal() + theme(legend.position = "bottom") + scale_color_brewer(palette="Paired")
+regplot <- ggplot(cleandata, aes(x = phyear, y = logpviews)) + scale_x_continuous(breaks = unique(phyear), labels=as.character(unique(year))) + theme_minimal() + theme(legend.position = "bottom") + scale_color_brewer(palette="Dark2")
 
 regplot_2 <- regplot + 
-  geom_point(aes(color = bareback), position = "jitter", size = 0.5) + 
+  geom_point(aes(color = bbcat), position = "jitter", size = 0.5) + 
   labs(title = "Log Views of Videos by Bareback Indication", subtitle = "Median Regressions", x="Year", y = "log(View Count)", color = "Bareback") + 
-  geom_segment(aes(x = 0, y = notbbmed$coefficients[1], xend = 4.5, yend =  notbbmed$coefficients[1] + notbbmed$coefficients[2]), size = 1) + 
-  geom_segment(aes(x = 4.5, y = notbbmed$coefficients[1] + notbbmed$coefficients[2], xend = 7, yend = notbbmed$coefficients[1] + notbbmed$coefficients[3]), size = 1) + 
-  geom_segment(aes(x = 0, y = bbmed$coefficients[1], xend = 4.5, yend = bbmed$coefficients[1] + bbmed$coefficients[2]), linetype = "dashed", size = 1, color = "red") + 
-  geom_segment(aes(x = 4.5, y = bbmed$coefficients[1] + bbmed$coefficients[2], xend = 7, yend = bbmed$coefficients[1] + bbmed$coefficients[3]), linetype = "dashed", size = 1, color = "red") +
+  geom_segment(aes(x = 0, y = notbbmed$coefficients[1], xend = 4.5, yend =  notbbmed$coefficients[1] + notbbmed$coefficients[2]*4.5), size = 1) + 
+  geom_segment(aes(x = 4.5, y = notbbmed$coefficients[1] + notbbmed$coefficients[2]*4.5, xend = 7, yend = notbbmed$coefficients[1] + notbbmed$coefficients[2]*7 + notbbmed$coefficients[3]*7), size = 1) + 
+  geom_segment(aes(x = 0, y = bbmed$coefficients[1], xend = 4.5, yend = bbmed$coefficients[1] + bbmed$coefficients[2]*4.5), linetype = "dashed", size = 1, color = "red") + 
+  geom_segment(aes(x = 4.5, y = bbmed$coefficients[1] + bbmed$coefficients[2]*4.5, xend = 7, yend = bbmed$coefficients[1] + bbmed$coefficients[2]*7 + bbmed$coefficients[3]*7), linetype = "dashed", size = 1, color = "red") +
   geom_vline(xintercept = 4.5, linetype = "dotted")
-regplot_2
-```
+regplot_2 + geom_quantile(aes(linetype = bbcat), quantiles = c(0.2, 0.4, 0.6, 0.8), method = "rqss") + labs(linetype = "Quintiles: Bareback")
 
-Equality of slopes between both fits
+taus <- c(1:9/10)
+quantbb <- rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "Yes", tau = taus)
+quantnotbb <- rq(logpviews ~ phyear + cutoff:phyear, subset = bbcat == "No", tau = taus)
+
+# Coefficient tables and t-tests significance
+
+for(i in 1:length(taus)){
+  kable(quantbb[[1]][,i], format = "html", digits = 4, booktabs = T)
+  kable(quantnotbb[[1]][,i], format = "html", digits = 4, booktabs = T)
+}
+
+```
 
 ##### Quantile Regression Analysis: Whole sample, Controlling for Bareback
 
@@ -423,13 +434,8 @@ Controlling for bareback indication:
 median <- rq(logpviews ~ phyear + bareback, tau = 0.5)
 
 # Multipe Quantiles
-taus <- c(.05,.1,.25,.75,.90,.95)
-quantiles <- rq(logpviews ~ phyear + bareback, tau = taus)
-
-# Create general plot
-
-
-# Plot relationship
+taus <- c(.2,.4,.6,.8)
+quantiles <- rq(logpviews ~ phyear + phyear:cutoff, tau = taus)
 regplot_1 <- regplot + 
   geom_point(aes(color = bareback), position = "jitter", size = 0.5) + 
   labs(title = "Log Views of Videos by Bareback Indication", x="Year", y = "log(View Count)", color = "Bareback Category") + 
@@ -451,25 +457,6 @@ taus <- c(.05,.1,.25,.5,.75,.90,.95)
 coefftab <- summary(rq(logpviews ~ phyear + bareback, tau = taus))
 
 for(i in 1:length(taus)){
-  print(kable(coefftab[[i]]$coefficients, format = "html", digits = 4, booktabs = T))
+  kable(coefftab[[i]]$coefficients, format = "html", digits = 4, booktabs = T)
   }
 ```
-
-#### Discussion
-
-TBA
-
-#### References
-
-Need to format!
-Brigham R. Frandsen, Markus Frölich, Blaise Melly, Quantile treatment effects in the regression discontinuity design, In Journal of Econometrics, Volume 168, Issue 2, 2012, Pages 382-395, ISSN 0304-4076, https://doi.org/10.1016/j.jeconom.2012.02.004.
-(http://www.sciencedirect.com/science/article/pii/S0304407612000607)
-
-[Koenker and Xiao (2001)](http://www.econ.uiuc.edu/~roger/research/inference/khmal6ap.pdf)
-https://www.cdc.gov/nchhstp/newsroom/2014/PrEP-Guidelines-Press-Release.html
-
-Cite all of the packages used!
-
-Cite R
-
-END

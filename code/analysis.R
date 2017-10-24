@@ -134,7 +134,7 @@ ggplot(cleandata, aes(x = bareback, y = views)) + theme_minimal() + scale_y_log1
 # Total number of videos by bareback category
 ggplot(cleandata, aes(x = year, fill = bareback)) + theme_minimal() + geom_bar(position = "dodge")
 
-ggplot(cleandata, aes(x = year, year = views, fill = bareback)) + theme_minimal() + geom_bar(position = "dodge")
+ggplot(cleandata, aes(x = year, year = views, fill = bbcat)) + theme_minimal() + geom_bar(position = "dodge")
 
 # By production status (I think this is highly suspicious)
 
