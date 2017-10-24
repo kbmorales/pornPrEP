@@ -74,12 +74,12 @@ for(i in seq_along(urls)) {
 all_data = do.call(rbind,dat.list)
 duplicate <- duplicated(all_data[,7])
 all_data[,"duplicate"] <- duplicate
-save(all_data, file = "data/siteindex_data.Rda")
+# save(all_data, file = "data/siteindex_data.Rda")
 
 # Delete duplicate rows -- deletes after first appearance, so first categories will be "overrepresented" (if that matters)
 all_data <- subset(all_data, !duplicated(all_data[,7]))
 all_data <- all_data[,-ncol(all_data)]
-save(all_data, file = "data/siteindex_data_nodup.Rda")
+# save(all_data, file = "data/siteindex_data_nodup.Rda")
 
 # Grab additional information from each video
 all_data$url <- as.character(all_data$url)
