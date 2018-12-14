@@ -1,11 +1,7 @@
-# adsfinalproj
-My repo for the final project for Advanced Data Science at JHSPH 1st Term 2017
+# PrEP and Porn
 
-Inital Proposal:
+## Trends in popularity of condom-less pornographic videos featuring men having sex with men
 
-Option 6 - Project Petition
+## Question
 
-Question: Is there a correlation between the safer sex practices employed in gay porn videos viewed on popular pornographic websites in the United States in the last 5 - 10 years and:
-  1. PrEP's US timeline (approval of Truvada as for pre-exposure prophylaxis, news cycle and ad campaigns, major health department efforts, cultural mentions, etc.) ,
-  2. Rates of gonorrhea, syphilis, and chlamydia among MSM in the USA,
-  3. Timeline of gay male social apps (Grindr, Scruff, etc.)?
+Is there a correlation between the safer sex practices employed in gay porn videos viewed on the popular pornographic website PornHub in the United States in the last 10 years and the United States Center for Disease Control's approval of Truvada for pre-exposure prophylaxis?
