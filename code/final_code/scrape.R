@@ -1,4 +1,4 @@
-# Cleaned scrape code
+# Code for scraping video metadata from PornHub
 
 
 # Setup -------------------------------------------------------------------
@@ -74,6 +74,10 @@ for(i in 1:maxvid) {
   response_delay <- as.numeric(t1-t0)
   Sys.sleep(10*response_delay)
 }
+
+
+# Save data ---------------------------------------------------------------
+
 
 # Combine listed dataframes into single dataframe
 all_data = do.call(rbind, randviddat.list)
