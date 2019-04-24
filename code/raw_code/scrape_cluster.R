@@ -6,10 +6,16 @@ library(httr)
 library(rebus)
 library(dplyr)
 
+
+# Setup -------------------------------------------------------------------
+
+
+# Category system from PH
 category_numbers <- c(252, 48, 40, 66, 58, 44, 56, 362, 392, 68, 382, 71, 352, 47, 46, 52, 62, 262, 70, 64, 39, 322, 50, 45, 332, 402, 51, 60, 372, 84, 85, 312, 54, 82, 49, 272, 77, 106, 342)
 category_names <- c("Amateur", "Asian", "Bareback", "Bear", "Big Dick", "Black", "Blowjob", "Casting", "Chubby", "College", "Compilation", "Creampie", "Cumshot", "Daddy", "Euro", "Fetish", "Group", "Handjob", "Hunks", "Interracial", "Japanese", "Jock", "Latino", "Massage", "Mature", "Military", "Muscle", "Pornstar", "POV", "Public", "Reality", "Rough Sex", "Solo Male", "Straight Guys", "Twink", "Uncut", "Vintage", "Virtual Reality", "Webcam")
 names(category_numbers) <- category_names
 
+# Base video URL
 url_stem <- 'https://www.pornhub.com/gay/video'
 
 urls <- paste0(url_stem, "?c=", category_numbers, "&si=1")
@@ -24,6 +30,10 @@ trimpatdate <- dgt(6) %R% "/" %R% dgt(2) # if Rebus package installed
 url <- "https://www.pornhub.com/gay/video/random"
 
 randviddat.list = list()
+
+
+# Old Scrape Code ---------------------------------------------------------
+
 
 i <- 1
 
@@ -61,12 +71,12 @@ all_data[,"duplicate"] <- duplicate
 save(all_data, file = "data/randvid_data.Rda")
 
 
-###
-### Reformatted code
-###
+# Reformatted Scraping Code -----------------------------------------------
+# Purpose: scrape metadata from random videos on the cluster
 
-# Purpose: scrape metadata from random videos 
 URL <- "https://www.pornhub.com/gay/video/random"
+trimpatdate <- dgt(6) %R% "/" %R% dgt(2) # if Rebus package installed
+trimpatvk <- fixed("https://www.pornhub.com/view_video.php?viewkey=")
 
 # Initialize data list and vars for storage
 randviddat.list = list()
@@ -75,16 +85,23 @@ maxvid <- 1000
 
 # Iterator for scraping
 for(i in 1:maxvid) {    
-  Sys.sleep(runif(1,0,1))                     # Sleep for 0 to 1 seconds
-  randurl <- HEAD(URL)[[1]]                   # Pull web address of random video
+  # Time benchmark
+  t0 <- Sys.time()
+  response <- GET(URL)
+  t1 <- Sys.time()
+  # Pull web address of random video
+  randurl <- HEAD(URL)[[1]]
+  # Return if bad link
   if (status_code(GET(randurl)) != 200) { 
-    maxvid <- maxvid + 1 # Return if bad link
+    maxvid <- maxvid + 1 
     next
   }
-  webpage <- read_html(randurl)               # Read in HTML document for random URL
+  # Read in HTML document for random URL
+  webpage <- read_html(randurl)
   # Check if class of premiumLocked exists
   if (length(html_attr(html_nodes(webpage, '.premiumLocked'), name = "class") != 0)) {
-    maxvid <- maxvid + 1                # Return if video is behind paywall
+    # Return if video is behind paywall
+    maxvid <- maxvid + 1                
     next
   }
   title <- html_nodes(webpage, '.inlineFree') %>% 
@@ -115,4 +132,16 @@ for(i in 1:maxvid) {
   # Save video data as dataframe in indexed list
   randviddat.list[[i]] = 
     data.frame(title, views, rating, categories, production, tags, added, viewkey)
+  # Delay next pull to prevent server overload
+  response_delay <- as.numeric(t1-t0)
+  Sys.sleep(10*response_delay)
 }
+
+# Combine listed dataframes into single dataframe
+all_data = do.call(rbind, randviddat.list)
+# Remove duplicates
+duplicate <- duplicated(all_data[,7])
+all_data[,"duplicate"] <- duplicate
+
+# Save final dataset
+save(all_data, file = "data/randvid_data.Rda")
