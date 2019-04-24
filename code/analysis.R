@@ -1,21 +1,22 @@
 # Purpose: to analyze the data and check primary hypothesis
 
 library(ggplot2)
+library(RColorBrewer)
 library(wordcloud)
 library(tidyr)
 library(ggthemes)
 library(kableExtra)
 library(cowplot)
-library(RColorBrewer)
 
-# EDA
-
+##
+## Analysis 1
+##
 
 # Titles Analysis
 bb_vids_titles <- cleandata
 bb_vids_titles$bbtitle <- grepl(bb_pattern, bb_vids_titles$titles, ignore.case=TRUE)
 
-ggplot(data = bb_vids_titles, aes(x = year, fill = bbtitle)) + theme_minimal() + geom_bar(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(bb_vids_titles$year),max(bb_vids_titles$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position="bottom") + labs(title = "Videos with Bareback Pattern in Title", subtitle = "Uploaded by year", x="Year", y = "Proportion", fill = "Bareback")
+ggplot(data = bb_vids_titles, aes(x = dyear, fill = bbtitle)) + theme_minimal() + geom_bar(position = "fill") + scale_fill_brewer(palette="Paired") + scale_x_continuous(breaks=seq(min(bb_vids_titles$year),max(bb_vids_titles$year),1)) + theme(axis.text.x = element_text(angle=45)) + theme(legend.position="bottom") + labs(title = "Videos with Bareback Pattern in Title", subtitle = "Uploaded by year", x="Year", y = "Proportion", fill = "Bareback")
 # Not super impressive
 
 # Tags analysis
@@ -106,10 +107,12 @@ popcats <- topcats[1:5,1]
 popcatspat <- str_c(popcats, collapse = "|")
 popranktop5 <- poprankyr[grep(popcatspat, poprankyr$cat),]
 
-# Pull total views by year
-yeartviews <- 
+## Don't know what happened here!
 
-popranktop5 <- mutate(popranktop5, )
+# Pull total views by year
+# yeartviews <- 
+
+# popranktop5 <- mutate(popranktop5, )
 
 # By year plot
 ggplot(data = popranktop5, aes(x = year, y = mviews)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_line(aes(color = cat)) + scale_x_continuous(breaks=seq(min(popranktop5$year),max(popranktop5$year),1)) + scale_y_log10() + theme(legend.position = "bottom") + labs(title = "Mean Views by Category per Year", subtitle = "Top 5 Categories by Overall Popularity, Mean Views Log Transformed", x="Year", y = "log(Views)", color = "Categories:")
@@ -129,7 +132,7 @@ bbbyyear$Bareback <- factor(bbbyyear$Bareback, levels = c(0,1), labels = c("No",
 ggplot(bbbyyear, aes(x=Year, y = Percentage, fill = Bareback)) + geom_col() + theme_minimal() + scale_fill_brewer(palette="Paired") + labs(title = "Percentage of Bareback Videos by Year")
 
 # Videos by views
-ggplot(cleandata, aes(x = bareback, y = views)) + theme_minimal() + scale_y_log10() + geom_violin()
+ggplot(cleandata, aes(x = bbcat, y = views)) + theme_minimal() + scale_y_log10() + geom_violin()
 
 # Total number of videos by bareback category
 ggplot(cleandata, aes(x = year, fill = bareback)) + theme_minimal() + geom_bar(position = "dodge")
@@ -150,7 +153,9 @@ table(cleandata$production, cleandata$bareback, cleandata$year)
 cleandata %>% group_by(bareback) %>% summarise(watched = sum(views), n = n(), mean = mean(views), mrating = mean(rating)) %>% ungroup ()
 
 
-# Regression
+##
+## Regression
+##
 
 # Penalty applied to video views in order to standardize the data. Older videos will have a larger opporunity to gather more views
 cleandata$penalty = 1/(2018 - cleandata$year)

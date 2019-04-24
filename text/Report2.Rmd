@@ -1,0 +1,325 @@
+---
+title: "PrEP and Porn"
+author: "Kenneth Morales"
+date: "April 6, 2018"
+output:
+  word_document: default
+  pdf_document: default
+subtitle: Trends in Popularity of Condom-less Pornographic Videos featuring Men having
+  Sex with Men
+header-include:
+- \usepackage{setspace}
+- \doublespacing
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+load("a2final.Rda")
+attach(cleandata)
+lm1 <- lm(logpviews ~ cdyear:cutoff + nrating + cutoff*bbcat - cutoff)
+```
+
+First Reader and Adviser: Robert Blum, MD
+Director, Urban Health Institute
+Professor, JHSPH Department of Population, Family, and Reproductive Health
+
+Second Reader: Susan Sherman, PhD
+Professor, JHSPH Department of Health, Behavior, and Society
+
+Third Reader: John Muschelli, PhD
+Professor, JHSPH Department of Biostatistics
+
+In partial fulfillment of degree requirements for the Master of Science in Public Health, Department of Population, Family and Reproductive Health
+
+---
+
+* Structured abstract (1 page maximum)
+  * Should include the following headings: Background, Objective (s) of study, Methods, Results, Conclusions
+* Introduction (1 to 3 pages)
+  * Importance of public health concern/problem
+  * The magnitude of problem and population affected 
+  * Knowledge gaps and how the current study fills the gaps
+* Methods (2 to 4 pages) - The information included in the Methods section should provide sufficient detail to the reader so that the quality of the study design, sampling methods, data sources, and measures can be clearly evaluated, even if the methods have been reported elsewhere. If the maximum essay length of 20 pages does not permit this level of detail, then students are encouraged to include an appendix describing additional details about the study methods. This appendix should supplement and not duplicate material already found in the body of the essay. Referring the reader to previous publications about the methods is not adequate.
+  * Study design 
+  * Sample/participants
+  * Data Sources
+  * Measures (for quantitative analyses, include variable tables that specifies variables and how they are operationalized -- categorical, ordinal, interval)
+  * Data analysis
+* Results
+* Discussion with Limitations and Implications for public health practice
+* References
+* Tables/figures
+
+## Abstract
+
+**Background. ** The last decade has seen a dramatic increase in the availability of sexually explicit media (SEM) on the Internet. Men who have sex with men (MSM) report near universal use of SEM. During this same period, the advent of pre-exposure prophylaxis (PrEP) has also stirred fears of risk compensation among MSM regarding their condom use practices.
+
+**Objective. ** While other studies have attempted to link sexual behaviors such as condomless anal sex with viewership of SEM, this study explores the potential change over time in the popularity of condomless SEM featuring MSM both pre- and post-issuance of the Center for Disease Control's recommendation for PrEP in MSM.
+
+**Methods. **
+
+**Results. **
+
+**Conclusions. **
+
+---
+
+## Introduction
+
+Sexually explicit media (SEM) has a variety of genres: apart from divisions along sexual orientation (gay, bisexual, straight), some SEM portray sexual behaviors that range from ‘vanilla’ (i.e., kissing, oral sex, vaginal sex, anal sex) to ‘kink’ (i.e., water sports, sadomasochism). Safer sex practices, including the portrayal of condom use, is also highly variable in SEM. Studios that primarily feature men having sex with men have generally upheld a self-imposed standard of condom use in anal sex in response to the AIDS crisis (Grudzen 2009). Concerns for the health of performers and the effects of SEM viewership on consumer sex practices have led to policies like California’s Measure B, which mandates the use of condoms in SEM (Los Angeles Times, 2012).
+
+The film scholar Linda Williams compared different kinds of pornography in the 1990s and early 2000s, revealing what she termed a proliferation of "diff'rent strokes for diff'rent folks." Since SEM first came into its own in the 1970s with the beginnings of a mainstream pornographic film industry, diversification of imagery has been a central ongoing aspect of modern pornography. Since its inception, the internet has opened up niches for producers and broadcasters targeting a wide range of specific sexual desires (Williams, 1992). In Williams' early article, sadomasochistic, homosexual, and bisexual pornographies are taken to illustrate a gap between the norm and "perversity," without taking into account the new interactions between categories that stem from their co-existence. As other media companies underwent corporate consolidation, porn studios followed suit. As the internet aged, algorithms increasingly determine popularity and what appears frontmost to users.
+
+These changes in SEM dissemination exemplify a counter current to Williams' original postulation: pornographic categories can provide a path from hegemonic to other, subaltern desires, but also can be a site where other desires can be subsumed within hegemonic ones. Barebacking, or penetrative anal sex without a condom between two men, could be a rising hegemonic desire within gay pornography. While condom-less gay porn existed, it was commonly regarded as kink, and was the domain of specialized, smaller production studios. In recent years, porn studios have begun dropping the condom use standard in response to competition from "tube" sites (such as PornHub), which aggregate and disseminate pornography generally for no upfront cost, and burgeoning competition from amateur pornographers, many of whom provide bareback porn unrestrained by mainstream conventions.
+
+### PrEP
+
+With the advent of pre-exposure prophylaxis (PrEP), however, gay porn studios had an out: they could provide bareback sex for audiences who preferred it while still bearing the mantle of "safer" sex (Schieber, 2017). PrEP is currently used almost exclusively as shorthand for the use of the antiretroviral drug Truvada, a two-drug combination manufactured by Gilead Sciences, to prevent the replication of HIV in unexposed populations. The CDC approved Truvada as PrEP in May of 2014 (CDC, 2014), and most large gay pornographic studios began producing bareback porn in the years following the CDC's endorsement (Str8UpGayPorn, 2017).
+
+Since 2011, five studies have examined the effects of gay SEM, all studying the relationship between bareback SEM consumption and HIV/STI risk, all of which have demonstrated varying degrees of positive association between watching unprotected anal intercourse and participating in the activity in their sex lives (Eaton et al., 2012; Nelson et al., 2014; Rosser et al., 2013; Stein et al., 2012; Traeen et al., 2014). Positive effects of SEM consumption among men who have sex with men (MSM) include sexuality education, particularly among young MSM, many of whom report learning about sexuality through this medium (Kubicek, 2010). SEM consumption has been found to positively predict higher numbers of sex partners (Braun-Courville & Rojas, 2009), though other studies did not find the same association (Rosser et al., 2013).
+
+The advent of PrEP has had cultural, social, and sexual ramifications among MSM communities concurrent to its effect on pornography production. Public health practicioners have expressed concern over "risk compensation," a term meant to capture a substitution of sexual risk behaviors (such as not using condoms during anal intercourse) when one or both partners are prescribed PrEP (Scott & Klausner, 2016). A meta-analysis of this phenomenon on sexually transmitted infections (STIs) found that MSM using PrEP were 25.3 times more likely to acquire a *Neisseria gonorrhoeae* infection, 11.2 times more likely to acquire a *Chlamydia trachomatis* infection, and 44.6 times more likely to acquire a syphilis infection versus MSM not using PrEP. The authors identify three factors associated with these incidence rate ratios: increased STI detection among clinically managed MSM, increased number of sex partners, and increased condomless sex (Kojima et al., 2016). Concern about risk compensation have coupled with stereotypes of promiscuity and associated stigma among MSM as well (Calabrese & Underhill, 2015).
+
+No studies to date have examined the impact these PrEP-associated cultural and sexual shifts among MSM have had on SEM use and popularity. Given the research at present on the effects of bareback pornography on viewers, the degree of primacy of SEM depicting unprotected anal intercourse in online pornographic websites is of public health interest. The purpose of this study is to explore the impact of the CDC's recommendation of PrEP for MSM has on the consumption of SEM on a major pornographic website over the last decade.
+
+## Methods
+
+I explored the popularity of pornographic videos containing MSM by their total view count among a cross-sectional sample of SEM videos from a popular pornographic video site. [PornHub](www.pornhub.com) is the world's largest pornography website, in operation since 2007. At the time of writing, it is the 36th most popular site on the web (Alexa, 2017). PornHub claims itself as a "video host:" in such a way, PornHub is capable of reaping the benefits of the massive traffic generated to its site while claiming no responsibility for the videos therein. In 2010, the start-up was bought out by a large adult entertainment conglomerate Manwin (now known as MindGeek), which owns several other similar "tube" sites as well as pornographic video production studios (Wallace, 2011).
+
+### Study design
+
+PornHub organizes video files by "categories" to differentiate between types of content. The larger level domain (www.pornhub.com) contains content most watched by the presumed heterosexual male viewer (men and women having sex with women), while the subdomain for gay content (www.pornhub.com/gayporn) contains SEM most watched by the presumed homosexual male viewer. Videos are separated from these higher level domains by virtue of being categorized as "Gay" or not in the website's category system.
+
+Visual examinination of each individual video would be impracticable given the scope of the project (a sample of thousands of videos from 10 years of video uploads to PornHub). Instead, this project utilizes the rich textual data accompanying videos available within each video's individual webpage. Such textual data includes both quantitative (number of views, date of video upload) and qualitative (categorization of videos into similar content types) data.
+
+Given the length of time PornHub has been online and its popularity as a source for free SEM, data will be available for videos uploaded both before and after the issuance of the CDC's guidelines on PrEP. Assembling a representative sample of uploads to PornHub and their associated textual data should allow for reasonable inference on how the popularity of SEM featuring condomless sex has changed over time.
+
+### Sample
+
+Web scraping is a method of extracting textual data from websites via hypertext transfer protocol with a bot for offline parsing. I utilized an automated web scraping program I wrote to capture individual video's textual data in a series of small batches from February 14 - February 25, 2017. The program takes advantage of PornHub's "Random" video URL (https://www.pornhub.com/gay/video/random) to capture a representative sample of the over five million uploads. Resultant batch data sets were then combined together in preparation for data cleaning and analysis.
+
+In order to be eligible for inclusion in the analysis, videos had to be
+* categorized as "Gay" by PornHub to appear in the gay subdomain,
+* not be behind the paywall for PornHub's premium service,
+* have been accessible from PornHub's "random" video URL in its gay subdomain utilized for scraping,
+* have been present on PornHub's servers at the time of web scraping,
+* and have been uploaded prior to the first date of webscraping (February 14, 2018) so the rate of views / year could be calculated. 
+
+**INSERT SAMPLE REDUCTION IMAGE**
+
+At the end of web scraping, a total of $n = 45707$ videos were successfully scraped by the software. $n = 27376$ videos remainded after removal of duplicated videos, identifiable by their unique video IDs that compose a portion of their web address. Videos that, by virtue of categorization into the "Solo Male" category, could not have demonstrated the activity of interest were removed from the sample (3,049 videos), leaving $n = 24329$ videos. 10 videos were uploaded during the duration of the web scraping process itself and were dropped, leaving a final sample of $n = $`r nrow(cleandata)` for analysis. This amount of videos roughly corresponds to a $0.5%$ random sample of all PornHub gay SEM uploads. Analyses were performed in R and videos were scraped with the R package "rvest" (R Core Team, 2017; Wickham, 2016).
+
+### Measures
+
+Variables of interest were each video's view count, the date the video was uploaded, the rating score assigned for each video (the proportion of voting viewers who "liked" the video out of all who voted), and PornHub's categorization of "bareback." After a review of all PornHub category labels, it was assumed that only SEM with the "bareback" category assignment have the activity of interest: condom-less penetrative anal sex between at least two men. View count stood in as a proxy for overall video popularity, and was measured by total video views at time of scraping. Video upload dates, $x_{1}$, were in decimal-years. Having no data on a time series for view count accumulation for each video, all videos were assumed to have a constant linear rate of growth from $0$ views at day of first upload to their view count when scraped. Total view counts were then divided by the total amount of elapsed time from upload date to time of scraping, $p$, to get each video's average views / year, the response variable $y$: this was done in order to control for a detection bias that could privilege older videos, which would have had a longer time to amass views. 
+
+### Analysis
+
+For analysis, views per year were log transformed, and the resultant values were approximately normal by visual assessment of a normal quantile-quantile plot and kernel density estimator. Sample size was too large to use the Shapiro-Wilk test for normality on view count data. Upload year was centered at $c$, the date of the CDC's issuance of their Truvada recommendation, May 14, 2014 ($2014.364$ in decimal-years), to ease in interpretation of the intercept term. Upload year was splined at the cutoff $c$ to determine the effect of a potential change in slope coefficient. The effect that a video's rating may have on viewcount was controlled for via inclusion of this variable, $x_{2}$, normalized via z-transformation. A binary variable indicating bareback categorization, $x_{3}$, was utilized both as an independent variable and via interaction with a dummy variable, $z$, for videos uploaded post-cutoff (after the CDC recommendation). Data on all four variables (upload date, total view count, rating, and bareback categorization) were available for the entire sample.
+
+The basic model for analyzing the SEM data presumes that the log-transformed yearly view rate has a conditional linear function of the form 
+
+$$log(y)_{(x)}= \left\{\begin{matrix} \beta _{0} + \beta _{1}x_{1} + \beta_{2}x_{2} + \beta_{3}x_{3}, & x_{1} \in \left (- \infty, c  \right )\\ \beta _{0} + \beta _{1'}x_{1} + \beta_{2}x_{2} + \beta_{3}x_{3} + \beta_{4}z|x_{3} = 1, & x_{1} \in \left [c, \infty  \right ) \end{matrix}\right.$$
+
+where $c = 2014.364$, corresponding to the date of the CDC's issuance of its PrEP guidelines. This relationship will be explored through both linear regression towards the mean to examine average effects through time, and through quantile regression to examine the effects across video popularity. As website content that is more popular can potentially generate more views by virtue of its prior success (more likely to be featured, recommended to users via web site algorithms, shared by other users, etc.), quantile regression is a particularly useful tool to examine how the measured variables' effect estimates may depend on level of yearly views.
+
+## Results
+
+Characteristics of the sample are presented in *Table 1*.
+
+**INSERT TABLE 1**
+
+*Add in descriptive statistics*
+
+Overall counts of videos in the data, binned by upload year and bareback categorization for ease in visualization, are presented in *Figure 1*. 
+
+![**FIGURE 1. Uploads increasingly tend to be bareback.** Proportionally, bareback categorized videos began seeing a marked increase in upload rates beginning in 2014.](./bbcatuploads.png)
+
+The data reflect a growing popularity in PornHub as a distribution platform through time, with `r nrow(subset(cleandata, year == 2010))` in 2010 and `r nrow(subset(cleandata, year == 2017))` in 2017; the calendar year with the greatest video uploads, 2013, had `r nrow(subset(cleandata, year == 2013))`, or $19.32\%$ of the entire sample. Assuming the sample is a reasonable representation of the total upload population on PornHub, there is a general trend in an increase of the proportion of bareback-categorized videos relative to non-bareback videos: beginning in 2014, over a quarter $(27.66\%)$ of all videos uploaded are categorized as bareback by PornHub, and that proportion grows to over one third for 2017 $(33.65\%)$.
+
+A similar trend in the popularity of bareback videos is observed across the upload years in the the five most popular categories of videos across the entire sample. These top five categories by proportion of total yearly view count is presented in *Figure 2*. In 2010, uploaded bareback-categorized videos only account for $1.05\%$ of that year's total views--by 2017, bareback becomes the most popular category by total views: $43.67\%$ of that upload year's views are attributed to such videos.
+
+*Do image with second panel for boxplot*
+
+![**FIGURE 2. Bareback-categorized videos gain in popularity over time, and have higher mean log views / year in the sample.** **A.** Across the entire sample, the five categories with the most views were examined temporally. Bareback (light blue) ends up on top at 2017, with over 40% of all views in that year attributed to this category of videos. **B.** In this sample, the relative popularity of bareback has increased over time, and dominates total views relative to all videos not categorized as bareback.](./fig2.png)
+
+### Linear Regression to the Mean
+
+Results from the initial linear regression model are presented below. *Figure 3* overlays the linear regression estimation for both bareback- and non-bareback categorized videos over the range of the observed upload dates. *Table 2* lists the coefficient estimates resulting from the linear regression towards the mean.
+
+![**FIGURE 3. Videos categorized as bareback enjoy a boost in popularity after CDC recommendation.** Visual examination of the data indicate a distinct kink in the linear trend of viewcounts overall. Splined linear regression estimates for average log views / year by bareback (blue) and non-bareback (black) categorization are overlaid; the CDC's recommendation of PrEP for MSM is indicated by the vertical red line. Though the bareback videos begin at a distinct disadvantage earlier in the timeline, this trend begins to reverse itself after the cutpoint corresponding to the CDC guidance.](./linreg_plot.png)
+
+**TABLE 2.** 
+Coefficients:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)          4.151267   0.006542 634.545  < 2e-16 ***
+nrating              0.221466   0.003067  72.210  < 2e-16 ***
+bbcatYes            -0.106395   0.014010  -7.594 3.20e-14 ***
+cdyear:cutoffPre     0.104081   0.003633  28.650  < 2e-16 ***
+cdyear:cutoffPost    0.229420   0.003293  69.669  < 2e-16 ***
+cutoffPost:bbcatYes  0.108762   0.016409   6.628 3.47e-11 ***
+
+Splined linear regression estimates for mean log views / year videos with average rating are overlaid by bareback and non-bareback categorization in *Figure 3*. Visual examination of the data indicate a distinct kink in the linear trend of viewcounts regardless of bareback categorization, beginning in 2014, just before the proposed cut off date corresponding to the CDC's PrEP recommendation on May 14, 2014 (indicated graphically with the vertical red line). This apparent increasing popularity of all video uploads is borne out via the splined regression coefficients for upload year: mean log views / year increases by `r round(coef(lm1)[4], 3)` per year prior to the proposed cutoff, and `r round(coef(lm1)[5], 3)` after, controlling for bareback categorization and video rating.
+
+Increasing proportions of bareback videos depicted in *Figure 1* is visually apparent, though difficult to discern, in the scatter of *Figure 3*. Though bareback videos have a distinct disadvantage in the portion of the timeline prior to the CDC recommendation, this trend begins to reverse itself after the CDC's PrEP recommendation. Bareback videos uploaded without regard to this cutoff date have their log yearly views attenuated, on average, by `r round(coef(lm1)[3], 3)`, while controlling for the effect that upload year and rating have on a video's popularity. Bareback videos uploaded after the CDC's recommendation, however, are just able to compensate for the modeled deficit: `r round(coef(lm1)[6], 3)`, resulting in a net positive effect for bareback videos, though minimal.
+
+### Quantile Regression
+
+An examination of the all of the distinct quantile regression solutions for this model gives an indication of the relative importance of each variable across the entire spectrum of video popularity. Each of the panels of *Figure 4* illustrate one coordinate of the vector-valued functions for each $\hat{\beta}\left (\tau  \right )$ and their 95% confidence bands for $\tau \in \left [0,1 \right ]$.
+
+![**FIGURE 4. Bareback videos uploaded after CDC recommendation enjoy more views regardless of video popularity.** Quantile regression process for the proposed log views / year model, representing the change in regression coefficients across video popularity. Y-axes are model coefficient values (note the differing y-axex), X-axes are the quantiles of the outcome (levels of $\tau$). Grey bands indicate the 95% confidence band for quantile coefficient estimates. Solid red lines are linear regression to the mean values from *Table 1*, with their associated confidence intervals (dashed red lines). Videos characterized as bareback become more popular than their non-bareback counterparts after the cutoff, as demonstrated by the bareback category & bareback-post-cutoff interaction term panels. The moderating effect of the uninteracted bareback category term diminishes among the most popular videos (above the $\tau = 0.75$ quantile), while the bareback-post-cutoff effect remains relatively stable.](./qreg_1.png)
+
+As would be expected, the rating score effect increases linearly: more popular videos are more sensitive to their rating score. A general trend of more popular videos being uploaded prior to the cut-off is also noticeable in the panels for the splined upload year term: though videos uploaded prior to May 14, 2014 have relatively stable estimates from $\tau$ values of $0.2$ to $0.8$, or the middle 60% of videos ranked by yearly view rate. Videos uploaded after the cut off tend to enjoy more views per year, given by the strength of the coefficients, though the coefficient strength trend is reversed for videos uploaded post-cutoff, indicating that more popular videos tend to be uploaded prior to the CDC's guidelines. The variable of interest, bareback categorization, demonstrates a more stable relationship in both its sample-wide coefficient estimate as well as its interaction with the cutoff corresponding to the CDC recommendation. The stability of these covariates in the quantile regression process supports the utility of the linear regression to the mean model as a reliable estimator of the effect of bareback categorization regardless of any individual video's overall popularity. 
+
+In the model, bareback videos across the entire sample suffer a penalty in log views per year. With the exemption of videos with log views / year at $\tau < 0.2$, relatively unpopular videos (below the median) have a reduction of $\hat{\beta}\left (x _{3} | \tau  \right ) \approxeq -0.14$ in their yearly view count. Among the highest quartile of popularity for bareback videos ($\tau > 0.75$), this estimate's reduction is attenuated: $\hat{\beta}\left (x _{3} | \tau  \right ) \approxeq -0.08$. In the highest decile of bareback videos, the estimate for $\hat{\beta}\left (x _{3} | \tau  \right )$ loses statistical significance. Bareback videos uploaded after the CDC's recommendation become more popular, overcoming the view count penalty associated with bareback videos discussed above. Across levels of $\tau$, the quantile regression process' estimate for model coefficient strength remains stable for bareback videos uploaded after the cutoff at $\beta_{4}z|x_{3} = 1 \approxeq 0.105$. 
+
+**TABLE 3. **
+Call: rq(formula = logpviews ~ cdyear:cutoff + nrating + cutoff * bbcat - 
+    cutoff, tau = taus)
+
+tau: [1] 0.2
+
+Coefficients:
+                    Value     Std. Error t value   Pr(>|t|) 
+(Intercept)           3.72742   0.00770  484.03841   0.00000
+nrating               0.17948   0.00293   61.20193   0.00000
+bbcatYes             -0.12476   0.01709   -7.29945   0.00000
+cdyear:cutoffPre      0.08882   0.00376   23.60027   0.00000
+cdyear:cutoffPost     0.25022   0.00381   65.61068   0.00000
+cutoffPost:bbcatYes   0.11245   0.02028    5.54393   0.00000
+
+Call: rq(formula = logpviews ~ cdyear:cutoff + nrating + cutoff * bbcat - 
+    cutoff, tau = taus)
+
+tau: [1] 0.4
+
+Coefficients:
+                    Value     Std. Error t value   Pr(>|t|) 
+(Intercept)           3.97912   0.00745  534.35867   0.00000
+nrating               0.20287   0.00279   72.69857   0.00000
+bbcatYes             -0.13148   0.01558   -8.44092   0.00000
+cdyear:cutoffPre      0.10607   0.00389   27.28422   0.00000
+cdyear:cutoffPost     0.24114   0.00367   65.71148   0.00000
+cutoffPost:bbcatYes   0.11340   0.01822    6.22538   0.00000
+
+Call: rq(formula = logpviews ~ cdyear:cutoff + nrating + cutoff * bbcat - 
+    cutoff, tau = taus)
+
+tau: [1] 0.6
+
+Coefficients:
+                    Value     Std. Error t value   Pr(>|t|) 
+(Intercept)           4.21551   0.00837  503.42627   0.00000
+nrating               0.23001   0.00315   72.97669   0.00000
+bbcatYes             -0.12183   0.01825   -6.67534   0.00000
+cdyear:cutoffPre      0.10863   0.00454   23.94972   0.00000
+cdyear:cutoffPost     0.23101   0.00400   57.79562   0.00000
+cutoffPost:bbcatYes   0.11012   0.02126    5.17840   0.00000
+
+Call: rq(formula = logpviews ~ cdyear:cutoff + nrating + cutoff * bbcat - 
+    cutoff, tau = taus)
+
+tau: [1] 0.8
+
+Coefficients:
+                    Value     Std. Error t value   Pr(>|t|) 
+(Intercept)           4.54654   0.01138  399.53209   0.00000
+nrating               0.25171   0.00499   50.42182   0.00000
+bbcatYes             -0.08591   0.03046   -2.82065   0.00480
+cdyear:cutoffPre      0.11042   0.00638   17.30360   0.00000
+cdyear:cutoffPost     0.21353   0.00548   38.94221   0.00000
+cutoffPost:bbcatYes   0.09904   0.03377    2.93284   0.00336
+
+**Table 3** lists the quantile regression results with the proposed model fit, regressing to the quintiles ($\tau = 0.2, 0.4, 0.6, 0.8$. 
+
+OLD LANGUAGE, REWORD WITH NEW TABLE
+*The "V"-shaped relationship between the model coefficients illustrated above is most evident in the coefficients for upload year at the $\tau$ = 0.6 and 0.8 among both categorizations of videos, though the magnitude of the intercept and slope coefficients among bareback videos is greater. Significance of the upload year coefficient may be instructive in delineating temporal trends in video popularity. Among the lowest quintile, the interaction term $\beta _{2, BB+}$ was not significant (p = 0.13) for bareback videos, while for non-bareback videos it was the uninteracted year term $\beta _{1, BB-}$, evidence that relatively unpopular bareback videos are more likely to have been uploaded prior to the advent of PrEP while unpopular non-bareback videos were more likely to have been uploaded after that time. This assessment is reinforced by the relative strength of the counterpart year coefficient ($\beta _{1, BB+}$ = 0.103, p < 0.001; $\beta _{2, BB-}$ = 0.091, p < 0.001). The model positions both types of videos roughly equivalently at $\tau$ = 0.4, but from there the model diverges by bareback categorization. Among bareback videos, the upload year coefficients move from being roughly equivalent in absolute value ($\beta _{1, BB+}$ = -0.182, $\beta _{2, BB+}$ = 0.189) at $\tau$ = 0.6 to an overall reduction in popularity at the highest quintile ($\beta _{1, BB+} + \beta _{2, BB+}$ = -0.062 net change in log-transformed yearly median view count) among videos uploaded after the cutoff. Among non-bareback videos, the trend at these quintiles is similar, though the overall change in popularity is greater for videos posted after the cutoff.*
+
+## Discussion
+
+Data scraped from PornHub's random video URL suggest that prior to the CDC's recommendation of PrEP for prevention of HIV seroconversion in MSM, bareback content was not as popular as other types of SEM on their website: such videos on average had $-0.106$ less log views / year. In the time period following this decision, however, a significant increase in the popularity of videos featuring condomless sex is evident--such videos now enjoy popularity roughly equal to non-bareback categorized videos: bareback videos' log yearly views are only $0.002$ higher. 
+
+*EDIT IN WORD!*
+
+Quantile regression indicates that these estimates for bareback categorization hold .
+
+The data also show a distinct shift in popularity of videos around the cutoff point. Positioning the cutoff between the binned upload year values of 2014 and 2015 was dictated by the CDC's approval of Truvada having occurred in that time span; it was not driven by the data itself. It is possible that the change in slope coefficient demonstrated by the quantile regression model could be reflecting the impact of a trend shift in viewing habits at an earlier time point. For example, the CDC decision could have occurred after a growing popularity of unprotected anal intercourse in PornHub consumer's preferences. Major advertisement campaigns, a growing adoption and openness of PrEP among sexually active gay men, and the use of "hook-up apps" could all have an effect on the types of sexual content consumers may search for on pornographic websites. The change in yearly proportion of bareback videos uploaded after the cutoff, as well as their proportioon of total views, strengthens the justification for the cutoff as assigned.
+
+The "V"-shaped pattern in the splined upload year terms with vertex at the cutoff point could be an indication of residual measuring bias, where the potential for increased views among older videos was not properly accounted for, or an indication of competition among more recently uploaded videos which may be more likely to appear together for the consumer to choose from. It is also possible that the more popular bareback videos were experiencing decline until secular trends around the cutoff point reversed that trajectory--presumably, a major announcement by the CDC, but other cultural phenomena could have taken place. The proportion of yearly uploads that are bareback, and their yearly view counts, suggest a trend change, however. The "V" pattern in model slopes could also reflect the small subsample sizes of bareback videos in the earliest upload year bins--if these happen to be quite popular videos, it would throw off the regression analysis.
+
+### Implications
+
+While this correlation in viewer preferences does not extend directly into the actions of porn consumers, including safer sex practices and PrEP adoption, it is a notable shift that could be indicative of these and other phenomenon. Given what currently available research suggests about the impact of viewing unprotected anal intercourse, growing popularity of bareback videos has implications for public health practitioners who work with men who have sex with men or in sexually transmitted infection control. Considering also the potential instructive role porn has in demonstrating sexuality to young MSM, who also may not receive any competent or comprehensive sexuality education, the import of bareback SEM could be magnified among younger viewers. 
+
+Moves toward widespread adoption of PrEP have been divisive, politically and within gay culture. Concerns include the likelihood of PrEP being used counter to the prescription, the potential for PrEP to undermine existing safer sex policies and social mores, and the incredible cost of the drug (as high as $450 / month). Given the economic and social capital that may be required to both receive and maintain adherence to a PrEP prescription, and the relatively low bar required to have access to online pornography, there are significant health equity concerns around who may be most impacted by the viewership of unprotected anal intercourse in gay SEM. According to the CDC, men who have sex with men are at increased risk for sexually transmitted infections when compared to women and exclusively heterosexual men (CDC, 2015). Researchers and clinicians have noted an increase in sexually transmitted infections among MSM--data from San Francisco show a steep climb in incident gonorrhea and syphilis among both HIV-positive and HIV-negative gay men, even while incident HIV cases continued to decline in what one researcher termed a "pretty fascinating epidemiological divide" (Newman, 2016). While studies have demonstrated being HIV-positive and using PrEP are both independently associated with a greater likelihood of being diagnosed with an STI (Mayer et al., 2016), little research has been undertaken demonstrating potentially changing cultural mores within gay culture generally around the acceptability of unprotected anal intercourse. More research is needed to examine the ways in which non-clinical factors of gay male sociability and sexuality, including pornography use, but also use of dating apps and interpersonal communication, may also factor into the increasing trend of bacterial sexually transmitted infections among men who have sex with men.
+
+### Limitations
+
+The current study operates within several limitations, imposed by the temporality of the study and the format of data storage from PornHub. Due to PornHub's robots.txt (a protocol for web scraping which dictates what type of document can be scraped automatically), isolating viewership by country of consumer was not possible. Their own published web traffic data by country allows for a reasonable assumption that the broader trends found without incorporating a country code (the method PornHub distinguishes traffic from different countries) should reflect USA-specific viewing trends: the US generates the most traffic and has the highest per capita page views. The assumption was also made that MSM would seek out porn from the gay porn section of the website. According to PornHub's own usage statistics for 2016, $\thicksim 3 \%$ of visitors from the US are "gay visitors," a statistic that is commensurate with national surveys on American's sexual orientation. This analysis was unable to control for the identity of viewers, however, and 37% of all gay male SEM views are from women (PornHub, 2017). I was also unable to examine videos behind PornHub's Premium service paywall. It is possible that viewing habits and the videos themselves might differ between Premium subscribers and users who only access content not behind a paywall. According to CovenantEyes, a religiously-based anti-porn advocacy organization modeled as a consumer watchdog, 9 out of 10 users access free pornography (CovenantEyes, 2017).
+
+For this analysis, I am relying on the host-supplied bareback categorization in order to determine if a video contains sex between two or more performers without use of condoms. Additionally, for the "Solo Male" category, which is removed from the sample due to its inability to capture the activity of interest, there is an added potential for misclassification. Screening individual videos for unprotected anal intercourse was outside of the scope of this project. Due to a lack of time-series data on accumulation of views, total view count amassed from upload dates to the time of scraping were unable to be examined in detail, and a constant linear rate of video accumulation was presumed. The ability to know viewing trends associated with each video would have refined the analysis. Finally, the analysis was reliant on PornHub's "random" video URL in sampling: there is no way for an investigator to understand how PornHub defines random for this purpose, or how truly random resultant videos are. As such, there is no way to verify that the sample pooled from this URL represent the uploaded video population as a whole.
+
+### Disclosure
+
+The author participated in the gay SEM industry from 2011 - 2016 and wrote an op-ed against the Los Angeles County proposal mandating condom use in SEM in 2012 (Cooper, 2012).
+
+---
+
+## References
+
+Alexa. The Top 500 Sites on the Web. Alexa Top 500 Global Sites, www.alexa.com/topsites. https://www.alexa.com/topsites
+
+Braun-Courville, D. K., & Rojas, M. (2009). Exposure to sexually explicit web sites and adolescent sexual attitudes and behaviors. Journal of Adolescent Health, 45(2), 156–162.
+
+Calabrese, S. K., & Underhill, K. (2015). How Stigma Surrounding the Use of HIV Preexposure Prophylaxis Undermines Prevention and Pleasure: A Call to Destigmatize "Truvada Whores". Am J Public Health. Oct; 105(10): 1960 - 1964.
+
+Center for Disease Control (2014). HIV PrEP Guidelines: New guidelines recommend daily HIV prevention pill for those at substantial risk. May 14. Available online at https://www.cdc.gov/nchhstp/newsroom/2014/PrEP-Guidelines-Press-Release.html.
+
+Center for Disease Control (2015). STDs in Men Who Have Sex with Men. 2015 Seuxally Transmitted Diseaes Surveillance, Special Focus Profiles. Available online at https://www.cdc.gov/std/stats15/msm.htm.
+
+Cooper, D. Mismeasure B. The Huffington Post. Posted November 9, 2012. https://www.huffingtonpost.com/entry/mismeasure-b_b_2094384.html
+
+CovenantEyes (2017). Pornography Statistics: 2015 Report. Available online at http://www.covenanteyes.com/pornstats/
+
+Eaton, L. A., Cain, D. N., Pope, H., Garcia, J., & Cherry, C. (2012). The relationship between pornography use and sexual behaviors among at-risk HIV-negative men who have sex with men. Sexual Health, 9(2), 166-170. 
+
+Grudzen, C. R., Elliot, M. N., Kerndt, P. R., Shuster, M. A., Brook, R. H., & Gelberg, L. (2009). Condom use and high-risk sexual acts in adult films: A comparison of heterosexual and homosexual films. American Journal of Public Health, 99(S1), S152-S156.
+
+Kojima, N., Davey, D. J., & Klausner, J. D. (2016). Research Letter. AIDS. 30: 2251 - 2252.
+
+Kubicek, K., Beyer, W. J., Weiss, G., Iverson, E., & Kipke, M. D. (2010). In the dark: Young men’s stories of sexual initiation in the absence of relevant sexual health information. Health Education & Behavior, 37(2), 243–263.
+
+Los Angeles Times (2012). Porn industry declares war on new condom law. November 8. Los Angeles Times. Retrieved from
+http://latimesblogs.latimes.com/lanow/2012/11/the-porn-industry-is-looking-for-ways-to-derail-a-voter-approved-ballot-measure-that-requires-actors-to-wear-condoms-during-f.html
+
+Mayer, K., Maloney, K., LEvine, K., King, D., Grasso, C., Krakower, D., and Boswell, S. HIV Infection and PrEP Use are Independently Associated with Increasing Diagnoses of Bacterial Sexually Transmitted Infections (BSTI) in Men Accessing Care at a Boston Community Health Center (CHC): 2005-2015. IDWeek 2016, Oral Abstract Session. Presented on October 29, New Orleans.
+
+Nelson, K. M., Simoni, J. M., Morrison, D. M., George, W. H., Leickly, E., Lengua, L. L., & Hawes, S. E. (2014). Sexually explicit online media and sexual risk among men who have sex with men in the United States. Archives of Sexual Behavior, 43, 833-843.
+
+Newman, E. (2016). STDs Among Gay Men in a New Era of PrEP. BetaBlog. June 16. Available online at http://betablog.org/stds-among-gay-men-new-era-prep/.
+
+Pornhub Insights (2017). Gay Porn Pride. June 22. Available online at https://www.pornhub.com/insights/gay-porn-pride.
+
+R Core Team (2017). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
+
+Rosser, B. R. S., Smolenski, D. J., Erickson, D. J., Iantaffi, A., Brady, S. S., Grey, J. A., & Wilkerson, J. M. (2013). The effects of gay sexually explicit media on the HIV risk behavior of men who have sex with men. AIDS and Behavior, 17(4), 1488-1498. doi:10.1007/s10461-013-0454-8
+
+Schieber, D. (2017). Money, Morals, and Condom Use: The Politics of Health in Gay and Straight Adult Film Production. Social Problems, spw046. https://doi.org/10.1093/socpro/spw046.
+
+Schrimshaw EW, Antebi-Gruszka N, Downing MJ Jr. Viewing of Internet-Based Sexually Explicit Media as a Risk Factor for Condomless Anal Sex among Men Who Have Sex with Men in Four U.S. Cities. PLoS One. 2016 Apr 27;11(4):e0154439.
+
+Scott, H. M., & Klausner, J. D. (2016). Sexually transmitted infections and preexposure prophylaxis: challenges and opportunities among men who have sex with me in the US. AIDS Res Ther; 13:5.
+
+Stein, D., Silvera, R., Hagerty, R., & Marmor, M. (2012). Viewing pornography depicting unprotected anal intercourse: Are there implications for HIV prevention among men who have sex with men. Archives of Sexual Behavior, 41(2), 411-419.
+
+Str8UpGayPorn. (2017). Bareback Gay Porn Studios Overwhelmingly Outnumber Condom Gay Porn Studios. Aug 17. Available online at  http://str8upgayporn.com/bareback-gay-porn-vs-condom-gay-porn/
+
+Træen, B., Hald, G., Noor, S., Iantaffi, A., Grey, J. A., & Rosser, B. R. S. (2014). The relationship between use of sexually explicit media and sexual risk behavior in men who have sex with men: Exploring the mediating effects of sexual self-esteem and condom use self-efficacy. International Journal of Sexual Health, 26, 13–24. 
+
+Wallace, B. (2011). The Geek Kings of Smut. New York Times Magazine. Feb 7. Online at https://web.archive.org/web/20141010205213/http://nymag.com/news/features/70985/index4.html.
+
+Wickham, H. (2016). rvest: Easily Harvest (Scrape) Web Pages. R package version 0.3.2. https://CRAN.R-project.org/package=rvest
+
+Williams, L. (1992). ‘Pornographies On/Scene, or Diff’rent Strokes for Diff’rent Folks.’ In Sex Exposed: Sexuality and the Pornography Debate, edited by Lynne Segal and Mary McIntosh, 233-265. London: Virago.
+
+Wilkerson, J. M., Inataffi, A., Smolenski, D. J., Brady, S. S., Horvath, K. J., Grey, J. A., & Rosser, B. R. S. (2012). The SEM risk behavior (SRB) model: A new conceptual model of how pornography influences the sexual intentions and HIV risk behavior of MSM. Sexual and Relationship Therapy, 27(3), 217-230.

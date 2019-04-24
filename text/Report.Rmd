@@ -1,16 +1,16 @@
 ---
-title: "PrEP and Porn: Trends in Popularity of Condom-less Pornographic Videos featuring Men having Sex with Men"
+title: "PrEP and Porn"
+subtitle: "Trends in Popularity of Condom-less Pornographic Videos featuring Men having Sex with Men"
 author: "Kenneth Morales"
-date: "October 22, 2017"
-header-includes:
-  - \usepackage{amssymb, amsmath, booktabs, multirow}
-output: 
+date: "April 6, 2018"
+output:
+  word_document:
+    toc: yes
   pdf_document:
     keep_tex: yes
-    pandoc_args:
-    - --latex-engine
-    - C:/Program Files/MiKTeX 2.9/miktex/bin/x64/pdflatex.exe
+    pandoc_args: --latex-engine=miktex
     toc: yes
+header-includes: \usepackage{amssymb, amsmath, booktabs, multirow}
 ---
 
 ```{r setup, include=FALSE}
@@ -26,7 +26,7 @@ attach(cleandata)
 
 ### Introduction
 
-The film scholar Linda Williams has compared different kinds of pornography, reavealing what she termed a proliferation of "diff'rent strokes for diff'rent folks." Since sexually explicit media (SEM) first came into its own in the 1970s with the beginnings of a mainstream pornographic film industry, diversification of imagery has been a central ongoing aspect of modern pornography. Since its inception, the internet has opened up niches for producers and broadcasters targeting a wide range of specific sexual desires (Williams, 1992). In Williams' early article, sadomasochistic, homosexual, and bisexual pornographies are taken to illustrate a gap between then norm and "perversity," without taking into account the new interactions between categories that stem from their co-existence. In the age of PageRank and the growing corporate dominance of pornographic production studios, however, the tyranny of the masses in SEM exemplifies a counter current: the proliferation of pornographic categories can show how hegemonic desires provide a path to other desires still, but also how other desires can be subsumed in hegemonic ones.
+The film scholar Linda Williams has compared different kinds of pornography, revealing what she termed a proliferation of "diff'rent strokes for diff'rent folks." Since sexually explicit media (SEM) first came into its own in the 1970s with the beginnings of a mainstream pornographic film industry, diversification of imagery has been a central ongoing aspect of modern pornography. Since its inception, the internet has opened up niches for producers and broadcasters targeting a wide range of specific sexual desires (Williams, 1992). In Williams' early article, sadomasochistic, homosexual, and bisexual pornographies are taken to illustrate a gap between then norm and "perversity," without taking into account the new interactions between categories that stem from their co-existence. In the age of PageRank and the growing corporate dominance of pornographic production studios, however, the tyranny of the masses in SEM exemplifies a counter current: the proliferation of pornographic categories can show how hegemonic desires provide a path to other desires still, but also how other desires can be subsumed in hegemonic ones.
 
 Barebacking, or penetrative anal sex without a condom between two men, could be a rising hegemonic desire in gay pornography. SEM has a variety of genres; some SEM portray sexual behaviors that range from ‘vanilla’ (i.e., kissing, oral sex, vaginal sex, anal sex) to ‘kink’ (i.e., extreme penetration, water sports, sadomasochism). Safer sex practices, including the portrayal of condom use, is also highly variable in SEM. Studios that primarily feature men having sex with men have generally upheld a self-imposed standard of condom use in anal sex as a response to the AIDS crisis (Grudzen 2009). Concerns for the health of performers and the effects of SEM viewership on consumer sex practices have led to policies like California’s Measure B, which mandates the use of condoms in SEM (Los Angeles Times, 2012).
 
