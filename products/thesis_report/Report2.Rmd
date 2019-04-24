@@ -14,7 +14,7 @@ header-include:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-load("a2final.Rda")
+load("analysis2_clean.Rda")
 attach(cleandata)
 lm1 <- lm(logpviews ~ cdyear:cutoff + nrating + cutoff*bbcat - cutoff)
 ```

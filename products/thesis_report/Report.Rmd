@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
 packages = c("devtools", "rmarkdown", "httr", "knitr", "rvest", "stringr", "rebus", "dplyr", "lubridate", "moments", "cowplot", "ggplot2", "wordcloud", "ggthemes", "kableExtra", "tidyr", "RColorBrewer", "reshape2", "quantreg")
 lapply(packages,library,character.only=TRUE)
-load("final.RDA")
+load("analysis1_clean.RDA")
 attach(cleandata)
 ```
 
