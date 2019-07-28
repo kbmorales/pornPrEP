@@ -23,7 +23,7 @@ i <- 1
 maxvid <- 1000
 
 # Iterator for scraping
-for(i in 1:maxvid) {    
+for(i in i:maxvid) {    
   # Time benchmark
   t0 <- Sys.time()
   response <- GET(URL)
@@ -72,7 +72,7 @@ for(i in 1:maxvid) {
     data.frame(title, views, rating, categories, production, tags, added, viewkey)
   # Delay next pull to prevent server overload
   response_delay <- as.numeric(t1-t0)
-  Sys.sleep(10*response_delay)
+  Sys.sleep(1*response_delay)
 }
 
 
