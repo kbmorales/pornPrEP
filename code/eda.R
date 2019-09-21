@@ -1,6 +1,6 @@
 ### Purpose: to analyze the data and check primary hypothesis
 ### KeMo
-###
+### Based off of first version of analysis done for project
 
 
 # Setup -------------------------------------------------------------------
@@ -15,17 +15,12 @@ library(cowplot)
 library(reshape2)
 
 # Loak cleaned vid data
-load("scraped_test.Rda")
+load(here::here("data/tidy_data",
+                "scraped_test.Rda"))
 
 # Remove 2009 (small sample size)
 clean_data <- scraped_data %>% 
   filter(year != "2009")
-
-###
-### Analysis 1
-###
-
-
 
 # Titles Analysis ---------------------------------------------------------
 
@@ -35,19 +30,23 @@ bb_vids_titles$bbtitle <- grepl(bb_pattern, bb_vids_titles$title, ignore.case=TR
 bb_vids_titles %>% 
 ggplot(aes(x = year, fill = bbtitle)) + 
   theme_minimal() + 
-  geom_bar(position = "fill") + 
+  geom_bar(position = "dodge") + 
   scale_fill_brewer(palette="Paired") + 
   scale_x_continuous(breaks=seq(min(bb_vids_titles$year),
                                 max(bb_vids_titles$year),
                                 1)
                      ) + 
   theme(axis.text.x = element_text(angle=45)) + 
-  theme(legend.position="bottom") + 
+  theme(legend.position=c(0.1, 0.9)) + 
   labs(title = "Videos with Bareback Pattern in Title", 
        subtitle = "Uploaded by year", 
        x="Year", 
        y = "Proportion", 
        fill = "Bareback")
+
+ggsave(here::here("products/figures/analysis_3",
+                  "vids_by_year_bb_pat.png"),
+       device = "png")
 
 # Not super impressive
 
@@ -112,6 +111,10 @@ melttags %>%
        y = "Proportion", 
        color="Tag")
 
+ggsave(here::here("products/figures/analysis_3",
+                  "poptags_by_year.png"),
+       device = "png")
+
 # Categories --------------------------------------------------------------
 
 # Check to see difference between bareback categories & bareback classification by string pattern
@@ -128,33 +131,46 @@ table(cats$bb_cat, cats$bb_pat)
 
 # Using category data
 cats %>%   
-  ggplot(aes(x = year, fill = bb_cat)) + 
+  count(year, bb_cat) %>% 
+  group_by(year) %>% 
+  mutate(sum=sum(n)) %>% 
+  mutate(proportion = n/sum) %>%  
+  ggplot(aes(x = year, y = proportion, fill = bb_cat)) + 
   theme_minimal() + 
-  geom_bar(position = "fill") + 
+  geom_col(position = "dodge") + 
   scale_fill_brewer(palette="Paired") + 
   scale_x_continuous(breaks=seq(min(melttags$year),
                                 max(melttags$year),
                                 1)
                      ) + 
   theme(axis.text.x = element_text(angle=45)) + 
-  theme(legend.position="none") + 
+  theme(legend.position=c(0.9,0.9)) + 
   labs(title = "Videos categorized as bareback", 
        subtitle = "Proportion uploaded by year", 
        x="Year", 
        y = "Proportion", 
        fill = "Bareback")
 
+ggsave(here::here("products/figures/analysis_3",
+                  "bb_cat_by_year.png"),
+       device = "png")
+
+
 # Using string pattern to identify BB vids
-cats %>% 
-  ggplot(aes(x = year, fill = bb_pat)) + 
+cats %>% count(year, bb_pat) %>% 
+  group_by(year) %>% 
+  mutate(sum=sum(n)) %>% 
+  mutate(proportion = n/sum) %>%  
+  ggplot(aes(x = year, y = proportion, fill = bb_pat)) + 
   theme_minimal() + 
-  geom_bar(position = "fill") + 
+  geom_col(position = "dodge") + 
   scale_fill_brewer(palette="Paired") + 
   scale_x_continuous(breaks=seq(min(melttags$year),
                                 max(melttags$year),
-                                1)) + 
+                                1)
+  ) + 
   theme(axis.text.x = element_text(angle=45)) + 
-  theme(legend.position= c(0.9,1.35)) + 
+  theme(legend.position=c(0.9,0.9)) + 
   labs(title = "Videos containing bareback string pattern", 
        subtitle = "Proportion uploaded by year", 
        x = "Year", 
