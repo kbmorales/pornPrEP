@@ -14,6 +14,9 @@ library(kableExtra)
 library(cowplot)
 library(reshape2)
 
+# Loak cleaned vid data
+load("scraped_test.Rda")
+
 # Remove 2009 (small sample size)
 clean_data <- scraped_data %>% 
   filter(year != "2009")
