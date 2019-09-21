@@ -38,7 +38,7 @@ scraped_data <- scraped_data %>% mutate(
 
 # Check for duplicates in final dataset by viewkey
 duplicate <- duplicated(scraped_data$viewkey)
-table(duplicate) # 20%?
+table(duplicate) # About 33% duplicates
 
 # Delete duplicate rows
 scraped_data <- scraped_data[!duplicate,]
@@ -47,6 +47,9 @@ scraped_data <- scraped_data[!duplicate,]
 table(year(scraped_data$added)) # 12 in 2009, 277 in 2018
 
 ### CONSIDER REMOVING 2009 and 2019 for data viz
+
+# Add year variable to dataset
+scraped_data$year <- year(scraped_data$added)
 
 rm(duplicate, scraped_files)
 

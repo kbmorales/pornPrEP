@@ -17,14 +17,16 @@ library(rdd)
 library(rdrobust)
 library(quantreg)
 
-# Rename to cleandata to match old analysis
+# Rename to clean_data to match old analysis
 
+clean_data <- scraped_data
 
-cleandata <- all_vids
+# Remove years 2009 and 2019 for now
+table(clean_data$year)
+clean_data <- clean_data %>% filter(year > 2009,
+                      year < 2019)
 
-###
-### EDA
-###
+# EDA ---------------------------------------------------------------------
 
 ### CONSIDER REMOVING 2009 and 2018 for DATA VIZ?!!
 
@@ -35,21 +37,36 @@ cleandata <- all_vids
 # Tags are essentially user-generated categories for videos. I created a wordcloud out of the 200 most common:
 
 # Wordcloud of tags
-tags <- cleandata[c("tags", "year")]
+tags <- clean_data[c("tags", "year")]
 tags$tags <- str_split(tags$tags, ", ")
-tags <- data.frame(word = names(table(unlist(tags$tags))), freq=as.numeric(table(unlist(tags$tags)))) %>% arrange(desc(freq))
+tags <- data.frame(word = names(table(unlist(tags$tags))), 
+                   freq=as.numeric(table(unlist(tags$tags)))) %>% 
+  arrange(desc(freq))
+
 tags$word <- as.character(tags$word)
-wordcloud(words = tags$word, freq = tags$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35, colors=brewer.pal(8, "Dark2"))
+wordcloud(words = tags$word, 
+          freq = tags$freq, 
+          min.freq = 1, 
+          max.words=200, 
+          random.order=FALSE, 
+          rot.per=0.35, 
+          colors=brewer.pal(8, "Blues"))
 
 # Bareback is #6, gay is #1
 # Remove "gay" as not very useful
 tags <- tags[-1, ]
-wordcloud(words = tags$word, freq = tags$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35, colors=brewer.pal(8, "Dark2"))
+wordcloud(words = tags$word, 
+          freq = tags$freq, 
+          min.freq = 1, 
+          max.words=200, 
+          random.order=FALSE, 
+          rot.per=0.35, 
+          colors=brewer.pal(8, "Blues"))
 
 # Time trends in 5 most popular tags
 poptags <- tags[1:5,1]
 poptagspat <- str_c(poptags, collapse = "|")
-tags <- cleandata[c("tags", "year")]
+tags <- clean_data[c("tags", "year")]
 tags$tags <- str_extract_all(tags$tags, poptagspat)
 
 # Convert year to character?
@@ -68,7 +85,22 @@ melttags <- melt(tags[,-1], id.vars = "year", factorsAsStrings = FALSE)
 melttags$bareback <- 0
 melttags$bareback[melttags$variable == "bareback"] <- 1
 
-ggplot(data = melttags, aes(x = year, y = value, colour = variable)) + theme_minimal() + scale_color_brewer(palette="Paired") + stat_summary(fun.y = mean, geom = "line", size = 1) + scale_x_continuous(breaks=seq(min(melttags$year),max(melttags$year),1)) + theme(axis.text.x = element_text(angle=45)) + labs(title = "Top 5 user tags on videos", subtitle = "Proportion of videos containing tag", x="Year", y = "Proportion", color="Tag")
+melttags %>%
+  ggplot(aes(x = year, y = value, colour = variable)) + 
+  theme_minimal() + 
+  scale_color_brewer(palette="Paired") + 
+  stat_summary(fun.y = mean, 
+               geom = "line", 
+               size = 1) + 
+  scale_x_continuous(breaks=seq(min(melttags$year),
+                                max(melttags$year),
+                                1)) + 
+  theme(axis.text.x = element_text(angle=45)) + 
+  labs(title = "Top 5 user tags on videos", 
+       subtitle = "Proportion of videos containing tag", 
+       x="Year", 
+       y = "Proportion", 
+       color="Tag")
 
 #
 # CATEGORIES
@@ -77,7 +109,7 @@ ggplot(data = melttags, aes(x = year, y = value, colour = variable)) + theme_min
 # Several of these categories would be useless to analyze: some specify the video format ("HD," "Virtual Reality"), the type of camerawork ("POV," "Webcam"), or the performer's relationship to PH itself ("Verified Models," "Verified Amateurs," "Exclusive"). Additionlly, the "Gay" category tag is useless for this analysis, since that is how the PH website filters videos for the straight and gay porn domains.
 
 # Remove videos with only a single male performer in them as identified by category
-nosolos <- all_vids[- grep("Solo Male", all_vids$categories),]
+nosolos <- clean_data[- grep("Solo Male", clean_data$categories),]
 # Capture n for sample table
 n3 <- nrow(nosolos)
 
@@ -91,14 +123,30 @@ badcats <- "Gay|HD|Virtual Reality|Verified Amateurs|Verified Models|Exclusive|P
 cats <- cats[!str_detect(cats$category, badcats), ]
 
 # Wordcloud, removal of bad categories
-wordcloud(words = cats$category, freq = cats$freq, scale = c(2.5,1), random.order=FALSE, rot.per=0.1, colors=brewer.pal(8, "Dark2"))
+wordcloud(words = cats$category, 
+          freq = cats$freq, 
+          scale = c(2.5,1), 
+          random.order=FALSE, 
+          rot.per=0.1, 
+          colors=brewer.pal(8, "Blues"))
 
 #
 # Graphs for total videos and views by category
 #
 
 # Plot by video count
-ggplot(data = cats, aes(x = category, y = freq)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_col() + coord_flip() + scale_x_discrete(limits=rev(cats$category[1:20])) + theme(legend.position = "bottom") + labs(title = "Total Videos by Category", subtitle = "Top 20 Categories", x="", y = "Total number of videos")
+cats %>% 
+  ggplot(aes(x = category, y = freq)) + 
+  theme_minimal() + 
+  scale_color_brewer(palette="Paired") + 
+  geom_col() + 
+  coord_flip() + 
+  scale_x_discrete(limits=rev(cats$category[1:20])) + 
+  theme(legend.position = "bottom") + 
+  labs(title = "Total videos by category", 
+       subtitle = "Top 20 categories", 
+       x="", 
+       y = "Total number of videos")
 
 # Calculate n, total views, and mean views by category and year
 poprank <- cats[,1]
@@ -112,11 +160,27 @@ for(i in seq_along(poprank)) {
 }
 
 # Identify the most popular categories overall, and to use to filter categorical popularity ranks
-topcats <- poprankyr %>% group_by(cat) %>% summarise(tviews = sum(mviews*n), count = sum(n)) %>% arrange(desc(tviews))
+topcats <- poprankyr %>% 
+  group_by(cat) %>% 
+  summarise(tviews = sum(mviews*n), 
+            count = sum(n)) %>% 
+  arrange(desc(tviews))
 
 # Plot categories by view count across entire sample
-ggplot(data = topcats, aes(x = cat, y = tviews)) + theme_minimal() + scale_color_brewer(palette="Paired") + geom_col() + coord_flip() + scale_x_discrete(limits=rev(topcats$cat[1:20])) + theme(legend.position = "bottom") + labs(title = "Total Views by Category", subtitle = "Top 20 Categories", x="", y = "Total Viewcount")
-# Bareback is second most popular
+topcats %>%  
+  ggplot(aes(x = cat, y = tviews)) + 
+  theme_minimal() + 
+  scale_color_brewer(palette="Paired") + 
+  geom_col() + 
+  coord_flip() + 
+  scale_x_discrete(limits=rev(topcats$cat[1:20])) + 
+  theme(legend.position = "bottom") + 
+  labs(title = "Total views by category", 
+       subtitle = "Top 20 categories", 
+       x="", 
+       y = "Total viewcount")
+
+# Bareback is second most popular by views
 
 #
 # Category popularity over time
@@ -126,11 +190,15 @@ topcats <- as.data.frame(topcats)
 popcats <- topcats[1:5,1]
 popcatspat <- str_c(popcats, collapse = "|")
 popranktop5 <- poprankyr[grep(popcatspat, poprankyr$cat),]
-popranktop5 <- popranktop5[,c(1,2,4)] %>% spread(cat, tviews)
-viewtotalyr <- nosolos %>% group_by(year) %>% summarise(total = sum(views)) %>% data.frame()
+popranktop5 <- popranktop5[,c(1,2,4)] %>% 
+  spread(cat, tviews)
+viewtotalyr <- nosolos %>% 
+  group_by(year) %>% 
+  summarise(total = sum(views)) %>% 
+  data.frame()
 popranktop5 <- merge(popranktop5[-1,], viewtotalyr[-1,])
 popranktop5[,2:6] <- popranktop5[,2:6] / popranktop5[,7]
-popranktop5 <- gather(popranktop5[,-7], year)
+popranktop5 <- gather(popranktop5[,-7])
 colnames(popranktop5) <- c("year", "cat", "prop")
 
 # Convert year variable to numeric
@@ -185,12 +253,12 @@ catbbcnt2.plot <- ggplot(data = catsns, aes(x = year, fill = bbcat)) + theme_min
 catbbcnt2.plot
 
 # Boxplot for overall logpviews by bbcat and cutoff
-ggplot(cleandata, aes(x = cutoff, y = logpviews)) + theme_minimal() + theme(legend.position = "right") + scale_color_brewer(palette="Paired") + geom_boxplot(aes(fill = bbcat)) + labs(title = "Log Yearly View Rate of Videos by Bareback Categorization", subtitle = "Pre- and post- cutoff", x="Cutoff", y = "log(Views / Year)", legend = "Bareback", fill = "Bareback")
+ggplot(clean_data, aes(x = cutoff, y = logpviews)) + theme_minimal() + theme(legend.position = "right") + scale_color_brewer(palette="Paired") + geom_boxplot(aes(fill = bbcat)) + labs(title = "Log Yearly View Rate of Videos by Bareback Categorization", subtitle = "Pre- and post- cutoff", x="Cutoff", y = "log(Views / Year)", legend = "Bareback", fill = "Bareback")
 # not super useful
 
 
 # Boxplot for yearly logpviews by bbcat
-ggplot(cleandata, aes(x = year, y = logpviews, group = interaction(year, bbcat))) + theme_minimal() + theme(legend.position = "none") + scale_color_brewer(palette="Paired") + geom_boxplot(aes(fill = bbcat)) + labs(title = "Log Yearly View Rate of Videos by Bareback Categorization", subtitle = "Entire sample", x="Bareback Category", y = "log(Views / Year)", color = "Bareback")
+ggplot(clean_data, aes(x = year, y = logpviews, group = interaction(year, bbcat))) + theme_minimal() + theme(legend.position = "none") + scale_color_brewer(palette="Paired") + geom_boxplot(aes(fill = bbcat)) + labs(title = "Log Yearly View Rate of Videos by Bareback Categorization", subtitle = "Entire sample", x="Bareback Category", y = "log(Views / Year)", color = "Bareback")
 # Not super useful
 
 
@@ -202,8 +270,8 @@ ggplot(cleandata, aes(x = year, y = logpviews, group = interaction(year, bbcat))
 nosolos$bbcat <- factor(ifelse(str_detect(nosolos$categories, "Bareback"), 1, 0), labels = c("No", "Yes"))
 
 # Re-arrange final dataset for analysis
-cleandata <- nosolos[c("title", "views", "rating", "categories", "tags", "production", "added", "year", "dyear", "bbcat", "bbpat")]
-cleandata <- arrange(cleandata, dyear)
+clean_data <- nosolos[c("title", "views", "rating", "categories", "tags", "production", "added", "year", "dyear", "bbcat", "bbpat")]
+clean_data <- arrange(clean_data, dyear)
 
 ###
 ### Analysis
@@ -220,11 +288,11 @@ cleandata <- arrange(cleandata, dyear)
 # Log of views
 
 # Log-transform outcome varible to make approximately normal
-cleandata$logviews = log10(cleandata$views)
+clean_data$logviews = log10(clean_data$views)
 
 # Check normality
-plot(density(cleandata$logviews)) # looks good
-qqnorm(cleandata$logviews) # looks good
+plot(density(clean_data$logviews)) # looks good
+qqnorm(clean_data$logviews) # looks good
 
 # Log of penalized views: since we have no time-series data on how views were accrued, analyze as views gathered over 1 year?
 
@@ -233,19 +301,19 @@ firstscrapedate <- mdy("02-14-2018")
 firstscrapedate <- decimal_date(firstscrapedate)
 
 # Determine amount of time videos have been uploaded to PH
-cleandata$dyrsup <- firstscrapedate - decimal_date(cleandata$added)  
+clean_data$dyrsup <- firstscrapedate - decimal_date(clean_data$added)  
 
 # Remove videos uploaded after first scrape date
-cleandata <- subset(cleandata, dyrsup >= 0)
+clean_data <- subset(clean_data, dyrsup >= 0)
 
 # Determine yearly view count by dividing total views by upload time
-cleandata$pviews <- cleandata$views / cleandata$dyrsup
+clean_data$pviews <- clean_data$views / clean_data$dyrsup
 
 # Log-transform views / year to make approximately normal
-cleandata$logpviews <- log10(cleandata$pviews)
-cleandata <- subset(cleandata, logpviews != Inf)
-plot(density(cleandata$logpviews)) # Looks good
-qqnorm(cleandata$logpviews) # Looks good
+clean_data$logpviews <- log10(clean_data$pviews)
+clean_data <- subset(clean_data, logpviews != Inf)
+plot(density(clean_data$logpviews)) # Looks good
+qqnorm(clean_data$logpviews) # Looks good
 
 #
 # Cutoff score
@@ -263,36 +331,36 @@ cutoffdate <- decimal_date(cutoffdate)
 cutoffdate <- cutoffdate - 2009
 
 # Assign videos to being uploaded before cutoff or not
-cleandata$cutoff <- ifelse(cleandata$dyear <= cutoffdate, 0, 1)
-cleandata$cutoff <- as.factor(cleandata$cutoff)
-levels(cleandata$cutoff) <- c("Pre", "Post")
-table(cleandata$cutoff) # Roughly half of the data set is in each category
+clean_data$cutoff <- ifelse(clean_data$dyear <= cutoffdate, 0, 1)
+clean_data$cutoff <- as.factor(clean_data$cutoff)
+levels(clean_data$cutoff) <- c("Pre", "Post")
+table(clean_data$cutoff) # Roughly half of the data set is in each category
 
 ## Centered dyear:
-cleandata$cdyear <- decimal_date(cleandata$added) - cutoffdate
+clean_data$cdyear <- decimal_date(clean_data$added) - cutoffdate
 
 #
 # Independent Variables?
 #
 
 # Rating - normalized
-cleandata$nrating <- (cleandata$rating - mean(cleandata$rating)) / sd(cleandata$rating)
+clean_data$nrating <- (clean_data$rating - mean(clean_data$rating)) / sd(clean_data$rating)
 
 
 # Save dataset
-save(cleandata, file = "data/a2working.Rda")
+save(clean_data, file = "data/a2working.Rda")
 
 ##
 ## Sample table
 ##
 
-nrow(subset(cleandata, cutoff == "Pre"))
-nrow(subset(cleandata, cutoff == "Post"))
+nrow(subset(clean_data, cutoff == "Pre"))
+nrow(subset(clean_data, cutoff == "Post"))
 
-prebbn <- subset(cleandata, cutoff == "Pre" & bbcat == "No")
-prebby <- subset(cleandata, cutoff == "Pre" & bbcat == "Yes")
-postbbn <- subset(cleandata, cutoff == "Post" & bbcat == "No")
-postbby <- subset(cleandata, cutoff == "Post" & bbcat == "Yes")
+prebbn <- subset(clean_data, cutoff == "Pre" & bbcat == "No")
+prebby <- subset(clean_data, cutoff == "Pre" & bbcat == "Yes")
+postbbn <- subset(clean_data, cutoff == "Post" & bbcat == "No")
+postbby <- subset(clean_data, cutoff == "Post" & bbcat == "Yes")
 
 nrow(prebbn)
 mean(prebbn$logpviews)
@@ -326,15 +394,15 @@ sd(postbby$rating)
 mean(postbby$dyear + 2009)
 sd(postbby$dyear + 2009)
 
-tbl <- table(cleandata$cutoff, cleandata$bbcat)
+tbl <- table(clean_data$cutoff, clean_data$bbcat)
 chisq.test(tbl)
 
-anova(aov(logpviews ~ cutoff * bbcat, data = cleandata))
-anova(aov(rating ~ cutoff * bbcat, data = cleandata))
-anova(aov(dyear + 2009 ~ cutoff * bbcat, data = cleandata))
+anova(aov(logpviews ~ cutoff * bbcat, data = clean_data))
+anova(aov(rating ~ cutoff * bbcat, data = clean_data))
+anova(aov(dyear + 2009 ~ cutoff * bbcat, data = clean_data))
 
 # NOT WORKING RIGHT!!!
-melted <- melt(cleandata, id.vars=c("cutoff", "bbcat"), measure.vars = c("views", "rating", "dyear"))
+melted <- melt(clean_data, id.vars=c("cutoff", "bbcat"), measure.vars = c("views", "rating", "dyear"))
 sumstats <- group_by(melted, cutoff, bbcat)
 summarise(sumstats, n = n(), median=median(value), IQR=IQR(value))
 
@@ -343,13 +411,13 @@ summarise(sumstats, n = n(), median=median(value), IQR=IQR(value))
 ## 
 
 # Attach final data set
-attach(cleandata)
+attach(clean_data)
 
 # Counts of stuff: skeleton formula
-nrow(subset(cleandata, year == 2017 & bbcat == "Yes")) / nrow(subset(cleandata, year == 2017)) # example of proportion of cat per year
+nrow(subset(clean_data, year == 2017 & bbcat == "Yes")) / nrow(subset(clean_data, year == 2017)) # example of proportion of cat per year
 
 # Using aggregate to get some #s
-bb_year_viewcounts <-aggregate(cleandata$views, list(BB = cleandata$bbcat, Year = cleandata$year), sum)
+bb_year_viewcounts <-aggregate(clean_data$views, list(BB = clean_data$bbcat, Year = clean_data$year), sum)
 
 #
 # Linear model 1 - entire sample
@@ -365,10 +433,10 @@ summary(lm2)
 ### Plot
 
 # Pretty data plot - FOR X AXIS
-regplot <- ggplot(cleandata, aes(x = added, y = logpviews)) + theme_minimal() + theme(legend.position = "bottom") + scale_color_brewer(palette="Dark2") + geom_point(aes(color = bbcat), position = "jitter", size = 0.5) + labs(title = "Log Yearly View Rate of Videos by Bareback Categorization", subtitle = "Linear Regression of the Mean", x="Year", y = "log(Views / Year)", color = "Bareback")
+regplot <- ggplot(clean_data, aes(x = added, y = logpviews)) + theme_minimal() + theme(legend.position = "bottom") + scale_color_brewer(palette="Dark2") + geom_point(aes(color = bbcat), position = "jitter", size = 0.5) + labs(title = "Log Yearly View Rate of Videos by Bareback Categorization", subtitle = "Linear Regression of the Mean", x="Year", y = "log(Views / Year)", color = "Bareback")
 
 # Workable plot
-regplot2 <- ggplot(cleandata, aes(x = cdyear, y = logpviews)) + theme_minimal() + theme(legend.position = "bottom") + scale_color_brewer(palette="Dark2") + geom_point(aes(color = bbcat), position = "jitter", size = 0.5) + labs(title = "Log Yearly View Rate of Videos by Bareback Categorization", subtitle = "Linear Regression of the Mean", x="Year", y = "log(Views / Year)", color = "Bareback")
+regplot2 <- ggplot(clean_data, aes(x = cdyear, y = logpviews)) + theme_minimal() + theme(legend.position = "bottom") + scale_color_brewer(palette="Dark2") + geom_point(aes(color = bbcat), position = "jitter", size = 0.5) + labs(title = "Log Yearly View Rate of Videos by Bareback Categorization", subtitle = "Linear Regression of the Mean", x="Year", y = "log(Views / Year)", color = "Bareback")
 
 # Add in cutoff
 regplot2 <- regplot2 + geom_vline(xintercept = 0, colour = "red")
@@ -409,7 +477,7 @@ summary(qregquints)
 # Linear model 1 - Top quintile of viewcounts
 #
 
-top20 <- cleandata[cleandata$logpviews >= quantile(cleandata$logpviews, probs = 0.8), ]
+top20 <- clean_data[clean_data$logpviews >= quantile(clean_data$logpviews, probs = 0.8), ]
 lmtop20 <- lm(data = top20, logpviews ~ cdyear:cutoff + nrating + cutoff*bbcat - cutoff)
 summary(lmtop20)
 
